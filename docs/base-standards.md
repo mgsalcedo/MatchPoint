@@ -4,22 +4,25 @@ Single source of truth for engineering conventions. Referenced by `CLAUDE.md`, a
 
 ## Testing discipline
 
-- TDD for business logic (matching/ranking, availability, booking state transitions): write the failing test first.
-- Pure domain logic (matching score, distance calc, booking rules) must be isolated from framework/IO code so it's unit-testable without a database or network.
+- TDD for business logic (matching/ranking, availability, lead creation): write the failing test first. Booking-state-machine testing is deferred to V2 per `docs/data-model.md`'s reconciliation note — do not build test scaffolding for booking states until that entity actually exists.
+- Pure domain logic (matching score, distance calc, lead-eligibility rules) must be isolated from framework/IO code so it's unit-testable without a database or network.
 - Every bug fix ships with a regression test that fails before the fix.
-- Critical paths (search → match → booking → confirmation) need integration-level coverage, not just unit tests.
+- Critical paths (search → match → contact → lead) need integration-level coverage, not just unit tests. The full booking/confirmation path is V2 scope and gets its own critical-path definition when that entity ships.
 
 ## Typing & code quality
 
 - Strict typing wherever the language supports it (no implicit `any` / untyped dicts for domain models).
-- Domain entities (see `docs/data-model.md`) are the single definition of truth — no ad-hoc duplicate shapes per layer.
+- Domain entities (see `docs/data-model.md`, physically `docs/database-schema.md`) are the single definition of truth — no ad-hoc duplicate shapes per layer.
 - No premature abstraction: three similar call sites before extracting a helper.
+- Business logic must enforce `docs/business-rules.md` (BR-001…BR-030), not re-derive equivalent constraints ad hoc; if a rule needs to change, update that doc, don't just change the code.
+- UI components follow `docs/design-system.md` (tokens/layout) and `docs/component-library.md` (props/priority) — don't invent a one-off component when a P0/P1 one already covers it. User-facing strings come from `docs/microcopy.md`, not ad-hoc copy written inline — if the needed copy doesn't exist there yet, add it to that doc, don't hardcode it in a component.
 
 ## Git & review conventions
 
 - Conventional commits (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`).
 - One OpenSpec/Spec Kit change/feature per branch; branch name matches the feature slug from `/speckit-specify`.
-- Every PR touching `docs/data-model.md`-adjacent code runs the `data-model-review` skill.
+- Every PR touching `docs/data-model.md`/`docs/database-schema.md`-adjacent code runs the `data-model-review` skill.
+- Every PR touching an endpoint runs against `docs/api-contracts.md` — update the contract doc in the same PR, don't let code and doc drift.
 - Every PR touching search/matching code runs the `geo-matching-review` skill.
 - Every PR touching user-facing profiles, listings, or contact/messaging flows runs the `trust-safety-review` skill.
 
