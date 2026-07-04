@@ -55,7 +55,7 @@ export function Results() {
           <button
             className="btn"
             onClick={() => navigate(`/organizations/${result.organization.id}`, { state: { resultRank: index + 1 } })}
-            style={{ borderColor: accentColor(result.organization.accent) }}
+            style={{ borderColor: accentColor(result.organization.sports[0]) }}
           >
             Ver comunidad
           </button>

@@ -75,7 +75,6 @@ export interface Organization {
   services: string[];
   coach?: string;
   profileStatus: "preloaded" | "claimed" | "verified" | "incomplete" | "suspended";
-  accent: string;
 }
 
 export interface SportMatchAnswers {

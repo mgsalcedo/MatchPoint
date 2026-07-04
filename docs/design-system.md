@@ -1,6 +1,8 @@
 # Design System — MatchPoint
 
-Living document (Fase 3 · Diseño, added 2026-07-03). Use this when implementing UI components, layout, styling, and design tokens for the PMV. Inspired by clean, curated products like Luma (see `docs/visual-direction.md`), but must be original to MatchPoint — final brand identity is not locked yet, so use semantic tokens, not hardcoded final brand colors.
+Living document (Fase 3 · Diseño, added 2026-07-03; palette/typography concretized 2026-07-04). Use this when implementing UI components, layout, styling, and design tokens for the PMV. Inspired by clean, curated products like Luma (see `docs/visual-direction.md`), but original to MatchPoint.
+
+Brand identity is now locked, grounded in `logo.png` (repo root) — the color values below were extracted by pixel sampling from that file (hue-clustered, not eyeballed), not invented. If the logo file changes, re-derive these values rather than hand-editing them.
 
 The PMV interface must support the core flow: Sport Match™ → Results → Community Profile → Contact.
 
@@ -15,36 +17,54 @@ The PMV interface must support the core flow: Sport Match™ → Results → Com
 
 ## Color direction
 
-Semantic tokens (final brand palette not locked):
+### Brand gradient (from `logo.png`, accent-only — never a full-surface background)
+
+| Stop | Hex | Role |
+|---|---|---|
+| Cyan | `#2E9FE5` | Gradient start |
+| Indigo | `#3A48DB` | |
+| Violet | `#6A3DE5` | Primary brand accent (closest single-color stand-in when a flat color is needed) |
+| Magenta | `#C93AC9` | |
+| Warm gold | `#E2A757` | Gradient end |
+
+Use this 5-stop gradient for: the logo/wordmark itself, the primary CTA button background, the match-quality badge glow, and a subtle blurred "aurora" wash behind hero sections (Welcome, Community profile top). Never apply it as a background behind body text or dense UI (forms, lists) — it must stay an accent, not wallpaper, to protect contrast and keep the interface feeling fast.
+
+### Neutral scaffold (semantic tokens — implement as CSS variables)
 
 ```css
---color-background
---color-surface
---color-surface-elevated
---color-text-primary
---color-text-secondary
---color-text-muted
---color-border
---color-primary
---color-primary-hover
---color-primary-soft
---color-accent
---color-success
---color-warning
---color-error
+--color-background: #FAFAFA;
+--color-surface: #FFFFFF;
+--color-surface-elevated: #FFFFFF; /* + shadow, see Elevation */
+--color-text-primary: #1A1A2E;   /* near-black with a violet undertone, not pure black */
+--color-text-secondary: #4A4A5E;
+--color-text-muted: #6B6B7D;
+--color-border: #E5E7EB;
+--color-primary: #6A3DE5;         /* violet stop, for flat-color contexts (icons, links, focus rings) */
+--color-primary-hover: #5730C4;
+--color-primary-soft: #EEEDFE;    /* violet-tinted light fill, e.g. selected option background */
+--color-accent: #C93AC9;          /* magenta stop, sparing use (secondary highlights) */
+--color-success: #1D9E75;
+--color-warning: #BA7517;
+--color-error: #DC2626;
 ```
 
-Recommended mood: warm neutral background, dark readable text, soft elevated cards, energetic but not neon primary color, subtle accent for Match™ moments, soft success green for match confirmation.
+Avoid: aggressive neon, all-black gym aesthetic, overly corporate blue, too many competing colors, using more than 2-3 of the 5 gradient stops as flat solids on the same screen.
 
-Avoid: aggressive neon, all-black gym aesthetic, overly corporate blue, too many competing colors.
+### Per-sport tag colors
+
+Distinct accent per sport tag (cards, chips) — same family as the brand gradient so tags read as "on-brand," not borrowed: Running `#D85A30` (coral), Trail `#639922` (green), Ciclismo `#1D9E75` (teal), Natación `#378ADD` (blue), Triatlón `#7F77DD` (violet, closest to primary), Centro de entrenamiento `#BA7517` (amber).
 
 ## Typography
 
-Clean sans-serif, strong headings, highly readable body text, friendly but premium.
+**DM Sans** (Google Fonts, single family, avoids licensing/self-hosting overhead) — one clean modern sans across headings and body. Rejected alternatives: elegant luxury serif pairings (Playfair Display, Cormorant — read spa/editorial, not sports) and condensed athletic pairings (Barlow Condensed — reads generic gym app, which `docs/visual-direction.md` explicitly avoids).
+
+```css
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+```
 
 Type scale: Display 36-44px, H1 30-36px, H2 24-30px, H3 20-24px, Body 16px, Small 14px, Caption 12px.
 
-Font weight: headings 600-700, body 400-500, buttons 600, labels 500-600.
+Font weight: headings 700, body 400-500, buttons 700, labels 500.
 
 ## Spacing system
 
@@ -61,6 +81,16 @@ Usage: buttons medium or pill; cards large; hero containers XL; tags pill.
 ## Elevation
 
 Subtle shadows only — avoid heavy card shadows. Tokens: `--shadow-sm`, `--shadow-md`, `--shadow-lg`. Usage: result cards small/medium, modals large, sticky CTA medium.
+
+## Named style: Iridescent Glass
+
+MatchPoint's style, tempered from the "Liquid Glass" pattern (heavy morphing blur + full-rainbow surfaces, common in Web3/fintech apps) down to something that stays fast and WCAG-compliant:
+
+- **Glass surfaces**: semi-transparent white background (`rgba(255,255,255,0.7)`), `backdrop-filter: blur(8-12px)` (not 20px+), 1px border at low opacity (`rgba(255,255,255,0.4)` on colored backgrounds, `var(--color-border)` on plain ones). Reserve for brand moments — hero sections, the standout top match result — not every card. Dense UI (forms, schedule lists, the results list beyond the top card) stays flat and opaque for legibility and performance.
+- **Gradient accents**: a 2-3 stop slice of the brand gradient (not all 5 stops at once — that reads as a rainbow slider, not a premium accent), used on the primary CTA and the match-quality badge glow.
+- **Aurora wash**: a large, heavily blurred, low-opacity (8-12%) blob of the gradient behind hero content — motion optional (slow drift, 10-20s loop), must respect `prefers-reduced-motion`.
+
+This is an accent treatment, not a redesign of every surface — see Color direction above for where the gradient may and may not appear.
 
 ## Layout
 

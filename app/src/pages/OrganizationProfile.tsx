@@ -66,7 +66,7 @@ export function OrganizationProfile() {
         ‹ Volver
       </button>
 
-      <div className="hero-block" style={{ background: accentColor(organization.accent) }}>
+      <div className="hero-block" style={{ background: accentColor(organization.sports[0]) }}>
         {organization.name
           .split(" ")
           .map((w) => w[0])

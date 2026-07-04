@@ -1,6 +1,8 @@
 # Visual Direction — MatchPoint
 
-Living document (Fase 3 · Diseño, added 2026-07-03). Design inspiration reference for anyone implementing UI — pairs with `docs/design-system.md` (tokens/rules) and `docs/component-library.md` (components).
+Living document (Fase 3 · Diseño, added 2026-07-03; grounded in the real logo 2026-07-04). Design inspiration reference for anyone implementing UI — pairs with `docs/design-system.md` (concrete tokens/rules) and `docs/component-library.md` (components).
+
+The abstract direction below is now backed by a concrete, named style — **Iridescent Glass** (see `docs/design-system.md`'s "Named style" section) — with hex values pixel-extracted from `logo.png` (repo root). Read this doc for the *why*, `design-system.md` for the *exact values*.
 
 **Inspiration boundary**: MatchPoint takes inspiration from Luma's clean, curated, event-like experience quality — but must not copy Luma's proprietary layouts, colors, icons, branding, copy, illustrations, or visual identity. Use Luma as a quality benchmark, not a template (see "Anti-copy rule" below).
 
@@ -52,7 +54,7 @@ flowchart LR
 
 **Imagery**: real, candid, community-based, outdoors when relevant, active but not intimidating, inclusive, Lima/Peru-contextual when possible. Avoid overly staged stock fitness photos, extreme bodybuilding visuals, generic gym equipment closeups, dark aggressive fitness clichés.
 
-**Cards**: central to the experience — should feel like curated recommendations, not database rows. Include a strong title, image or visual marker, match label, 2-3 reasons, clear CTA, tags.
+**Cards**: central to the experience — should feel like curated recommendations, not database rows. Include a strong title, image or visual marker, match label, 2-3 reasons, clear CTA, tags. The top result and hero moments use the Iridescent Glass treatment (`docs/design-system.md`); the rest of the list stays flat for legibility.
 
 **Motion**: subtle. Recommended uses: Sport Match™ progress, match calculation transition, button feedback, card entrance, contact confirmation. Avoid distracting animations, excessive loading, gamification-heavy motion.
 

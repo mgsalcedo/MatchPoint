@@ -38,7 +38,6 @@ export const organizations: Organization[] = [
     },
     services: ["Grupo de WhatsApp", "Fotos de cada salida"],
     profileStatus: "verified",
-    accent: "coral",
   },
   {
     id: "trail-sisters-peru",
@@ -61,7 +60,6 @@ export const organizations: Organization[] = [
     },
     services: ["Préstamo de bastones", "Charlas de nutrición"],
     profileStatus: "claimed",
-    accent: "green",
   },
   {
     id: "andes-ciclismo",
@@ -87,7 +85,6 @@ export const organizations: Organization[] = [
     },
     services: ["Plan de entrenamiento", "Mecánica básica"],
     profileStatus: "verified",
-    accent: "teal",
   },
   {
     id: "aqua-lima-natacion",
@@ -116,7 +113,6 @@ export const organizations: Organization[] = [
     services: ["Casilleros", "Coach certificado"],
     coach: "Coach Rosa Mendoza",
     profileStatus: "verified",
-    accent: "blue",
   },
   {
     id: "triatlon-miraflores",
@@ -144,7 +140,6 @@ export const organizations: Organization[] = [
     services: ["Plan de temporada", "Test de rendimiento", "Fisioterapia"],
     coach: "Coach Diego Salinas",
     profileStatus: "verified",
-    accent: "purple",
   },
   {
     id: "fitzone-training-center",
@@ -171,7 +166,6 @@ export const organizations: Organization[] = [
     },
     services: ["Evaluación física gratis", "Nutrición básica"],
     profileStatus: "preloaded",
-    accent: "amber",
   },
   {
     id: "callao-runners",
@@ -196,7 +190,6 @@ export const organizations: Organization[] = [
     },
     services: ["Grupo de WhatsApp"],
     profileStatus: "preloaded",
-    accent: "pink",
   },
   {
     id: "pro-cycling-lab",
@@ -220,6 +213,5 @@ export const organizations: Organization[] = [
     services: ["Test de potencia", "Plan individual"],
     coach: "Coach Renzo Ibarra (UCI certified)",
     profileStatus: "claimed",
-    accent: "purple",
   },
 ];
