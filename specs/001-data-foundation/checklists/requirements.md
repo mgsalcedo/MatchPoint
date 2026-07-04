@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,5 +31,5 @@
 
 ## Notes
 
-- One deliberate `[NEEDS CLARIFICATION]` remains at FR-012 (trust-&-safety policy for committing real third-party contact info to the public repo). This is intentional and is the primary input for `/speckit-clarify` — it is a genuine scope/privacy decision the owner must make (constitution Principle VI), not a gap the spec should guess at. All other checklist items pass.
+- Resolved via `/speckit-clarify` (Session 2026-07-04): FR-012 trust-&-safety policy (commit real contact info, repo goes private first), scope boundary (DB + data-access layer only, no UI rewire this milestone), and seed distribution (all 6 sports + Callao). No `[NEEDS CLARIFICATION]` markers remain; all checklist items pass.
 - Spec keeps Supabase/SQL specifics out (they belong in `plan.md`); it names Supabase only where the stack is already locked by the constitution, framed as a dependency/assumption rather than an implementation choice being made here.

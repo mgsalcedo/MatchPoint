@@ -53,7 +53,7 @@ Because MatchPoint preloads real third-party organizations before they claim the
 
 **Acceptance Scenarios**:
 
-1. **Given** the trust-&-safety policy for seed contact data (to be confirmed in clarification), **When** the seed is committed to the public repo, **Then** third-party contact information is handled exactly as that policy dictates.
+1. **Given** the repository has been made private, **When** a seed containing real third-party contact information is committed, **Then** it is committed only to the now-private repository; no seed with real contact data is ever committed while the repository is public.
 2. **Given** a community is preloaded but not yet claimed, **When** its record is created, **Then** its `profile_status` reflects `preloaded` and it carries no data fabricated beyond what is publicly available (`BR-016`).
 
 ### Edge Cases
@@ -63,12 +63,20 @@ Because MatchPoint preloads real third-party organizations before they claim the
 - What happens when a community has no contact channel at all? (Expected: it is not surfaced as discoverable, since contact is the product's whole point — `BR-009` / minimum launch dataset.)
 - What happens when the same community would match both a selected district and an adjacent one? (Expected: it is returned; adjacency handling detail belongs to the matching milestone, but the catalog must not hide it.)
 
+## Clarifications
+
+### Session 2026-07-04
+
+- Q: The repo is public — what's the trust-&-safety policy for committing real third-party contact info to the seed? → A: Commit real contact info (Option B), but the repository will be made private first; real contact data must not be committed while the repo is public.
+- Q: Does this milestone rewire the app UI to read live data, or stop at the database plus a data-access layer? → A: Stop at the database + a tested data-access layer; the app's pages keep reading mock data this milestone. Rewiring the UI to the live query happens in a later milestone alongside the matching rebuild.
+- Q: How should the 10+ seed organizations be distributed across sports and districts? → A: Cover all 6 PMV sports (at least one organization each) and span multiple districts including at least one in Callao, so filtering by any sport or district returns results.
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
 - **FR-001**: The system MUST persist a catalog of sports organizations and their related data (sports, districts, venues, schedules, sport-specific environment/ADN attributes) mirroring the entity definitions in `docs/data-model.md` and the physical schema in `docs/database-schema.md` — no ad-hoc duplicate shapes.
-- **FR-002**: The catalog MUST be seeded with at least 10 real sports communities located in Lima Metropolitana and Callao, spanning the PMV sports (running, trail running, cycling, swimming, triathlon, training centers).
+- **FR-002**: The catalog MUST be seeded with at least 10 real sports communities located in Lima Metropolitana and Callao. The seed MUST cover all six PMV sports (running, trail running, cycling, swimming, triathlon, training centers) with at least one organization each, and MUST span multiple districts including at least one in Callao — so that filtering by any PMV sport or any covered district returns results.
 - **FR-003**: Anonymous visitors (no login) MUST be able to retrieve active organizations filtered by sport and by district.
 - **FR-004**: Organizations whose status is `suspended` or `archived` MUST NOT appear in any public read result (`BR-008`).
 - **FR-005**: Only organizations meeting the minimum launch dataset (name, sport, district or venue, contact method, schedule or availability note, level, environment, short description) MUST be eligible to appear as discoverable (`docs/data-model.md` "Minimum launch dataset").
@@ -77,8 +85,8 @@ Because MatchPoint preloads real third-party organizations before they claim the
 - **FR-008**: Row-level security MUST allow public read of active organizations, sports, districts, venues, schedules, and ADN attributes, and MUST restrict lead creation to authenticated users — the lead write path is a later milestone, but the policy MUST be correct now.
 - **FR-009**: All secrets (database URL, keys, connection strings) MUST be supplied through environment configuration excluded from version control; no secret may be committed to the repository or its history.
 - **FR-010**: The environment setup MUST be documented as a runbook (create the database project, set environment variables, apply migrations, run the seed) sufficient for a new developer to reproduce the environment unaided.
-- **FR-011**: The catalog MUST be consumable by the existing application through a data shape compatible with what its screens currently receive from mock data, so a later milestone can swap the data source without changing the UI component contracts.
-- **FR-012**: Seed data for real third-party organizations MUST handle their contact information (WhatsApp numbers, Instagram handles) according to [NEEDS CLARIFICATION: the repo is public — confirm the trust-&-safety policy for committing real third-party contact info. Proposed default: the versioned seed uses real names, districts, sports, schedules, and ADN attributes but redacts/placeholders contact info; real contact info is loaded only into the private database, never committed].
+- **FR-011**: This milestone MUST deliver a tested data-access layer — a function that returns organizations by sport and district from the database — whose output shape is compatible with what the app's screens currently receive from mock data. Rewiring the existing UI pages to call this layer instead of the mock is explicitly OUT OF SCOPE for this milestone; it happens in a later milestone alongside the matching rebuild (Milestone 3). The parity requirement exists so that later swap needs no UI component-contract changes.
+- **FR-012**: Seed data MAY include real third-party organizations' contact information (WhatsApp numbers, Instagram handles). This is permitted **only on the condition that the repository is private**: the repository MUST be made private before any seed containing real contact data is committed, and real contact data MUST NOT be committed while the repository is public. (Residual note, Principle VI: making the repo private removes the public-exposure risk, but real contact data committed to git history persists for the life of the repo — if it is ever made public again, that history is exposed. FR-009's rule that secrets/keys are never committed is unaffected and still applies regardless of repo visibility.)
 
 ### Key Entities *(include if feature involves data)*
 
@@ -95,12 +103,12 @@ Because MatchPoint preloads real third-party organizations before they claim the
 
 ### Measurable Outcomes
 
-- **SC-001**: At least 10 real Lima sports communities are present and discoverable across the PMV sports and multiple districts.
+- **SC-001**: At least 10 real Lima sports communities are present and discoverable, with every one of the six PMV sports represented by at least one community and coverage spanning multiple districts including Callao.
 - **SC-002**: Filtering the catalog by any PMV sport and any covered district returns matching active communities with no perceptible delay at seed scale (tens of records).
 - **SC-003**: A repository and git-history scan finds zero committed secrets (database URL, keys, connection strings).
 - **SC-004**: A new developer can reproduce the full database (schema + seed) from the runbook in under 30 minutes without help beyond the runbook.
 - **SC-005**: 100% of suspended or archived communities are excluded from every public catalog result.
-- **SC-006**: The application's existing screens can render the real catalog with no change to their component contracts (data-shape parity with the current mock source).
+- **SC-006**: The data-access layer returns organizations in a shape matching the current mock data source, verified by a test — so a later milestone can swap the app's data source without changing UI component contracts. (The UI swap itself is out of scope this milestone.)
 
 ## Assumptions
 
