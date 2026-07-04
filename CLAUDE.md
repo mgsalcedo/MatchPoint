@@ -57,24 +57,15 @@ When asked to implement a feature: check the relevant docs above first; preserve
 
 ## Workflow
 
-Full SDD cycle per feature ("Flujograma Nivel 4 · Crear una aplicación con SDD", codified 2026-07-03). Applies once a feature moves past exploration into real engineering (Fase 2+) — a throwaway/shell-only pass (like the current PMV UI skeleton in `/app`) can skip straight to step 8 and defer the rest. `/speckit-constitution` runs once for the whole project, before step 1 of the first feature.
+Lean SDD cycle per feature (slimmed 2026-07-04 from the original 16-step corporate harness — this is a didactic PMV, the point is to learn Spec Kit's core loop, not to run every gate). Applies once a feature moves past exploration into real engineering — a throwaway/shell-only pass (like the current PMV UI skeleton in `/app`) can skip straight to step 5 and defer the rest. `/speckit-constitution` already ran once for the whole project (`.specify/memory/constitution.md`); don't re-run it per feature.
 
-1. **Idea** — define objective, problem, target user, MVP scope, success criteria in conversation, grounded in `docs/product-brief.md`/`docs/vision.md`. Gate: is the problem clearly stated? If no → redefine before continuing.
-2. **Issue** — create a simple GitHub user-story issue (`gh issue create`). Gate: readable in under 2 minutes? If no → simplify the issue.
-3. **Enrich US** — `/speckit-specify` (reads the issue plus repo context/docs, produces `spec.md`).
-4. **Revisar spec** — `/speckit-clarify` to resolve ambiguity; review scope, business rules, inputs/outputs, expected UX, constraints. Gate: does `spec.md` represent exactly what should be built? If no → iterate by chat through `/speckit-clarify`, never hand-edit `spec.md`.
-5. **Proposal** — why the change exists, modules impacted, new capabilities, risks/dependencies — captured in `/speckit-plan`'s rationale; for a significant architecture decision, also record an ADR (`docs/adrs/NNNN-title.md`, indexed in `docs/adrs/README.md` — one per notable decision, never overwritten — superseded by a new ADR instead).
-6. **Diseño técnico** — `/speckit-plan` (architecture, DB, components, APIs, states/navigation, interfaces); for data-model/API/matching changes, also invoke the `backend-architect` agent.
-7. **Definir DoD** — `/speckit-checklist` to generate this feature's Definition of Done (functionality complete, tests pass, errors handled, accessible, responsive, secure). Gate: is the DoD measurable? If no → tighten it.
-8. **Apply** — `/speckit-tasks` then `/speckit-implement` (branch, code, implement logic, keep `tasks.md` updated as work lands).
-9. **Verificación automática** — the `/verify` skill (drives the real app through the Preview/browser tools, not just reads code) plus the project's test suite. Gate: do all tests pass and does the behavior match the spec? If no → fix and re-run, don't proceed on red.
-10. **Peer Review** — `/code-review` (quality, architecture, malpractice, duplication).
-11. **Security Review** — `/security-review`, plus this project's `security-privacy-auditor` agent and `trust-safety-review` skill for anything touching auth, location, contact-info visibility, or moderation.
-12. **Accessibility Review** — `design:accessibility-review` (contrast, keyboard nav, screen readers, labels).
-13. **Autofix** — `/code-review --fix` to apply review findings automatically where safe.
-14. **Simplify** — `/simplify` (remove redundancy, reduce complexity, improve readability — quality only, not bug-hunting).
-15. **Sync** — `/speckit-analyze` to catch drift across `spec.md`/`plan.md`/`tasks.md`/code; update `docs/data-model.md` and other living docs by hand per its findings (see Golden rules — never auto-regenerate markdown). Gate: do spec and code actually match? If no → resync before archiving.
-16. **Archive** — open a PR (`gh pr create`); a human approves and merges it (I don't merge or push without being explicitly asked, and merging is always the user's call — see "Sending to GitHub" below); then close the feature/change.
+1. **Idea** — define objective, problem, target user, scope, success criteria in conversation, grounded in `docs/product-brief.md`/`docs/vision.md`. Gate: is the problem clearly stated? If no → redefine before continuing. (Optional: open a GitHub issue with `gh issue create` if you want that practice — not required.)
+2. **Especificar** — `/speckit-specify` produces `spec.md`; its acceptance criteria are this feature's Definition of Done (no separate checklist step).
+3. **Aclarar** — `/speckit-clarify` to resolve ambiguity (scope, business rules, inputs/outputs, expected UX, constraints). Gate: does `spec.md` represent exactly what should be built? If no → iterate by chat, never hand-edit `spec.md`.
+4. **Diseño técnico** — `/speckit-plan` (architecture, DB, components, APIs, states/navigation). Invoke the `backend-architect` agent only for data-model/API/matching changes. Record an ADR (`docs/adrs/NNNN-title.md`, indexed in `docs/adrs/README.md`) only when you make a decision worth remembering — optional, not a mandatory step.
+5. **Construir** — `/speckit-tasks` then `/speckit-implement` (branch, code, keep `tasks.md` updated). TDD for matching/ranking logic per constitution Principle III; the rest of the UI is not test-gated.
+6. **Verificar** — the `/verify` skill (drives the real app through the Preview/browser tools, not just reads code) plus any tests. Gate: does the behavior match the spec and are tests green? If no → fix and re-run, don't proceed on red.
+7. **Revisar y archivar** — one `/code-review` pass (quality, duplication, simplification — folds in what the old autofix/simplify steps did; apply fixes with `/code-review --fix`). Add `/security-review` + the `security-privacy-auditor` agent + `trust-safety-review` skill **only** when the change touches auth, location, contact-info visibility, or moderation (Principle VI); glance at accessibility (contrast, keyboard, labels) when the change is UI-facing. Run `/speckit-analyze` only if code and spec have drifted. Then open a PR (`gh pr create`) for a human-approved merge — see "Sending to GitHub" below.
 
 ### Golden rules
 
@@ -86,7 +77,7 @@ Full SDD cycle per feature ("Flujograma Nivel 4 · Crear una aplicación con SDD
 
 ### Sending to GitHub
 
-I never push, open, or merge anything on my own initiative — every git action that touches the remote (`git push`, `gh pr create`, `gh pr merge`, `gh issue create`) happens only when explicitly asked in that turn, per the Git Safety Protocol in my base instructions. Concretely: I create commits only when asked; I create a PR (step 16) only when asked, and even then I don't merge it — "PR aprobado por humano" means you review and merge it (or explicitly tell me to merge), not that opening the PR implies approval to land it. Force-push, `--no-verify`, and skipping signing are off the table unless you explicitly ask for that specific action.
+I never push, open, or merge anything on my own initiative — every git action that touches the remote (`git push`, `gh pr create`, `gh pr merge`, `gh issue create`) happens only when explicitly asked in that turn, per the Git Safety Protocol in my base instructions. Concretely: I create commits only when asked; I create a PR (step 7) only when asked, and even then I don't merge it — "PR aprobado por humano" means you review and merge it (or explicitly tell me to merge), not that opening the PR implies approval to land it. Force-push, `--no-verify`, and skipping signing are off the table unless you explicitly ask for that specific action.
 
 ## Specialized agents (`.claude/agents/`)
 
