@@ -38,7 +38,7 @@ Target type is the existing `app/src/types.ts` `Organization` (FR-011/SC-006 —
 | `schedules[]` | `schedules[]` | `day_of_week`(int, 1=Mon ISO, research.md R3)→`Weekday`; `user_level`→`Level` |
 | `priceRange` | — (no column) | fixed `"no_confirmado"` (research.md R5) |
 | `trialClassAvailable` | — (no column) | fixed `false` (research.md R5) |
-| `whatsapp`,`instagram`,`bookingLink` | `whatsapp_number`,`instagram_url`,`booking_url` | `?? undefined` |
+| `whatsapp`,`instagram`,`bookingLink`,`website` | `whatsapp_number`,`instagram_url`,`booking_url`,`website_url` | `?? undefined`. `website` added during implementation (research.md R8) — a real schema/mock gap the original cross-check missed. |
 | `adnDeportivo` | `organization_adn` | map 1-5 scales + environments |
 | `services[]` | — (no column) | fixed `[]` (research.md R5) |
 | `coach` | — (no column) | `undefined` (research.md R5; Coach not table-backed yet) |

@@ -7,7 +7,8 @@ export type OrgType =
   | "federation"
   | "event_organizer"
   | "academy"
-  | "community";
+  | "community"
+  | "other";
 
 export type Sport =
   | "running"
@@ -71,6 +72,7 @@ export interface Organization {
   whatsapp?: string;
   instagram?: string;
   bookingLink?: string;
+  website?: string;
   adnDeportivo: AdnDeportivo;
   services: string[];
   coach?: string;

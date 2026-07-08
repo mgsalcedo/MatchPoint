@@ -4,13 +4,15 @@ Resolves the open questions surfaced by the `backend-architect` plan (`.claude/d
 
 ## R1 — `organization_type` enum mismatch (DB 13 values vs app 9)
 
-**Decision**: Map DB → app in the mapper via a lookup table, and **extend the app's `OrgType` union additively** with `"federation"` and `"gym"` so no DB value is lost. Mapping: `running_team|trail_team|cycling_club|swimming_academy|triathlon_club → "club"` is rejected as lossy; instead map each `*_team`/`*_club`/`*_academy` to the closest existing value (`running_team → "team"`, `cycling_club|triathlon_club → "club"`, `swimming_academy → "academy"`, `training_center → "training_center"`, `coach_independent → "coach"`, `sports_community → "community"`, `federation → "federation"` [new], `gym → "gym"` [new], `event_organizer|academy|other → "academy"|"other"`).
+**Correction (during `/speckit-implement`)**: reading `app/src/types.ts` directly showed the `backend-architect`'s premise was wrong — the app's `OrgType` **already** has `federation`, `gym`, `event_organizer`, and `academy`. The DB's 13 values map cleanly onto the app's set **except `other`**, which has no app equivalent. So the only additive extension needed is `"other"`, not `federation`/`gym`.
 
-**Rationale**: additive union extension is lossless and low-risk (touches only `app/src/types.ts` + the mapper; the mock data doesn't use `federation`/`gym`, so nothing breaks). Lossy collapse would silently misrepresent org types once the UI shows real data in Milestone 3.
+**Decision**: Map DB → app in the mapper via a lookup table, and **extend the app's `OrgType` union additively with `"other"`**. Mapping: `running_team|trail_team → "team"`, `cycling_club|triathlon_club → "club"`, `swimming_academy → "academy"`, `training_center → "training_center"`, `gym → "gym"`, `coach_independent → "coach"`, `federation → "federation"`, `event_organizer → "event_organizer"`, `sports_community → "community"`, `academy → "academy"`, `other → "other"` (new).
 
-**Alternatives considered**: (a) lossy collapse into the existing 9 — rejected, loses information. (b) seed only orgs whose type maps cleanly — rejected, artificially constrains the real-data curation.
+**Rationale**: additive union extension is lossless and low-risk (touches only `app/src/types.ts` + the mapper). The earlier claim of a 9-vs-13 gap requiring two new values was a misread; the real gap was a single value (`other`).
 
-**Consequence flagged to owner**: `app/src/types.ts` `OrgType` gains two values. This is the one code file outside `supabase/`+`lib/data/` this milestone touches.
+**Alternatives considered**: map `other` onto an existing catch-all (`community`) — rejected, loses the distinction and the DB explicitly models `other` as its own value.
+
+**Consequence flagged to owner**: `app/src/types.ts` `OrgType` gains one value (`"other"`). This is the one code file outside `supabase/`+`lib/data/` this milestone touches.
 
 ## R2 — Should `profile_status = 'rejected'` also be excluded from public reads?
 
@@ -59,6 +61,16 @@ Resolves the open questions surfaced by the `backend-architect` plan (`.claude/d
 **Decision**: Fold the public-safe reference seed (districts + 6 sports, zero PII) directly into migration steps 3 and 4 rather than a separate seed file; only the contact-bearing org seed (`002_organizations.sql`) is a gated, separate step. CI wiring for the integration test is **deferred** — the integration test must exist and be runnable locally/manually (documented in the runbook); an ephemeral-Supabase CI pipeline is a later infra decision (no CI config exists in the repo today).
 
 **Rationale**: districts/sports are reference data effectively part of the schema; gating them behind repo-private would over-apply FR-012 (which is specifically about third-party contact info). Deferring CI keeps this milestone's scope honest — the constitution's test-first rule is satisfied by the tests existing and passing locally.
+
+## R8 — FR-005 eligibility refined during seed authoring (T020); `website` added to Organization
+
+**Context**: while curating the real Lima/Callao seed (T020), several real organizations had confirmed contact info and district but no publicly confirmed weekly schedule (only venue hours, an approximate start time, or nothing at all), and one (Club Regatas Unión, La Punta/Callao) had no confirmed WhatsApp/Instagram — only a real website (cru.pe) and phone. Neither gap should be papered over with fabricated data (BR-016), so two refinements:
+
+**Decision 1 — schedule is a soft signal, not a hard eligibility blocker.** FR-005's own wording is "schedule **or availability note**" — re-read literally, this already permits an org to be eligible without a confirmed weekly slot. `meetsMinimumDataset()` in `app/src/lib/data/organizations.ts` now hard-requires only: name, ≥1 sport, ≥1 venue/district, ≥1 real contact channel. "Level" and "environment" (also named in FR-005) are satisfied via `organization_adn` (curated per `docs/data-model.md`'s explicit "In PMV, ADN can be manually curated" allowance), not via a per-schedule field. An org with zero schedule rows is still discoverable; a later milestone's UI shows "Horario por confirmar" (`docs/ux-flows.md`) rather than excluding it — consistent with BR-013 ("missing data reduces confidence, doesn't always exclude").
+
+**Decision 2 — `website` added as a valid contact channel and a new `Organization` field.** `docs/database-schema.md`'s `organizations.website_url` had no corresponding field in the app's mock `Organization` type at all (a gap the original schema/mock cross-check missed — `website_url` wasn't among the four gaps flagged in R5). Added `website?: string` additively (same pattern as R1's `OrgType` extension); `meetsMinimumDataset()`'s contact check now includes it. Without this, Club Regatas Unión — the only real, contactable natación organization found in Callao — would have been wrongly excluded for lacking WhatsApp/Instagram despite having a real, verifiable website.
+
+**Rationale**: both changes trade a stricter-than-necessary reading of FR-005 for its actual, more permissive text, and fix a genuine schema-mock gap — neither invents data. Alternative considered: fabricate a plausible schedule/WhatsApp number for the affected orgs — rejected outright (BR-016).
 
 ## Cross-check result
 
