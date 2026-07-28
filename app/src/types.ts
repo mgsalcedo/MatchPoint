@@ -46,9 +46,9 @@ export type Weekday = "lun" | "mar" | "mie" | "jue" | "vie" | "sab" | "dom";
 export interface Schedule {
   day: Weekday;
   startTime: string;
-  endTime: string;
+  endTime?: string;
   sessionType: string;
-  level: Level;
+  level?: Level;
 }
 
 export interface AdnDeportivo {

@@ -150,6 +150,29 @@ describe("mapOrganizationRow — shape parity (SC-006)", () => {
     ]);
   });
 
+  it("leaves endTime/level undefined rather than fabricating a default when unconfirmed (BR-016)", () => {
+    const org = mapOrganizationRow(
+      fixtureRow({
+        schedules: [
+          {
+            id: "sc2",
+            day_of_week: 1,
+            start_time: "05:00:00",
+            end_time: null,
+            session_name: "Entrenamiento matutino",
+            level_min: null,
+            level_max: null,
+            venue_id: "v1",
+            sport_id: "s1",
+          },
+        ],
+      })
+    );
+    expect(org.schedules).toEqual([
+      { day: "lun", startTime: "05:00", endTime: undefined, sessionType: "Entrenamiento matutino", level: undefined },
+    ]);
+  });
+
   it("uses safe defaults for fields with no DB column (research.md R5, BR-016)", () => {
     const org = mapOrganizationRow(fixtureRow());
     expect(org.priceRange).toBe("no_confirmado");

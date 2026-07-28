@@ -103,7 +103,9 @@ export function OrganizationProfile() {
         {organization.schedules.length > 0 ? (
           organization.schedules.map((s, i) => (
             <div key={i} className="meta-row">
-              {DAY_LABELS[s.day]} · {s.startTime}–{s.endTime} ({timeOfDay(s.startTime)}) · {LEVEL_LABELS[s.level]}
+              {DAY_LABELS[s.day]} · {s.startTime}
+              {s.endTime ? `–${s.endTime}` : ""} ({timeOfDay(s.startTime)}) ·{" "}
+              {s.level ? LEVEL_LABELS[s.level] : "Nivel por confirmar"}
             </div>
           ))
         ) : (

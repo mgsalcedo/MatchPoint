@@ -224,9 +224,17 @@ values (
   true
 );
 
+-- Code-review fix: the source states "lun-sáb" (Mon-Sat) hours — one row per day of that
+-- range so day-based filtering actually matches, instead of a single Monday row standing in
+-- for the whole range (previously days 2-6 had no schedule row at all).
 insert into schedules (organization_id, venue_id, sport_id, day_of_week, start_time, end_time, session_name, level_min, level_max)
 values
   ('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-0000000000a6', (select id from sports where slug = 'natacion'), 1, '07:00:00', '20:00:00', 'Horario de local (lun-sáb)', 'never_practiced', 'advanced'),
+  ('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-0000000000a6', (select id from sports where slug = 'natacion'), 2, '07:00:00', '20:00:00', 'Horario de local (lun-sáb)', 'never_practiced', 'advanced'),
+  ('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-0000000000a6', (select id from sports where slug = 'natacion'), 3, '07:00:00', '20:00:00', 'Horario de local (lun-sáb)', 'never_practiced', 'advanced'),
+  ('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-0000000000a6', (select id from sports where slug = 'natacion'), 4, '07:00:00', '20:00:00', 'Horario de local (lun-sáb)', 'never_practiced', 'advanced'),
+  ('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-0000000000a6', (select id from sports where slug = 'natacion'), 5, '07:00:00', '20:00:00', 'Horario de local (lun-sáb)', 'never_practiced', 'advanced'),
+  ('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-0000000000a6', (select id from sports where slug = 'natacion'), 6, '07:00:00', '20:00:00', 'Horario de local (lun-sáb)', 'never_practiced', 'advanced'),
   ('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-0000000000a6', (select id from sports where slug = 'natacion'), 7, '08:00:00', '18:00:00', 'Horario de local (domingo)', 'never_practiced', 'advanced');
 
 insert into organization_adn (organization_id, beginner_friendly, competitiveness, social_atmosphere, training_intensity_score, performance_focus, inclusiveness, family_friendly, group_size, coach_involvement, event_frequency)
@@ -300,8 +308,9 @@ values (
   true
 );
 
-insert into schedules (organization_id, venue_id, sport_id, day_of_week, start_time, session_name, level_min, level_max)
-values ('00000000-0000-0000-0000-000000000008', '00000000-0000-0000-0000-0000000000a8', (select id from sports where slug = 'triatlon'), 1, '05:00:00', 'Entrenamiento matutino (hora de inicio aproximada)', 'intermediate', 'advanced');
+-- Code-review fix: the only start_time found was explicitly labeled "aproximada" (approximate)
+-- by the source — not a confirmed fact, so per the seed's own no-fabrication policy (BR-016,
+-- research.md R8) no schedule row is inserted, same as orgs 2, 3, 5, 9 with no confirmed time.
 
 insert into organization_adn (organization_id, beginner_friendly, competitiveness, social_atmosphere, training_intensity_score, performance_focus, inclusiveness, family_friendly, group_size, coach_involvement, event_frequency)
 values ('00000000-0000-0000-0000-000000000008', 2, 5, 3, 5, 5, 2, 1, 'small', 5, 3);

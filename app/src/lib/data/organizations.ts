@@ -68,11 +68,11 @@ export async function getOrganizations(
   orgs = orgs.filter(meetsMinimumDataset);
 
   // Sport filter: org offers the requested sport (post-fetch narrowing at seed scale, research.md R6).
+  // The app `Sport` values differ from DB slugs (e.g. "trail" vs "trail-running"), so translate
+  // the target slug once via the same mapper table, rather than per (org, sport) pair.
   if (params.sportSlug) {
-    const target = params.sportSlug;
-    orgs = orgs.filter((o) =>
-      o.sports.some((s) => sportMatchesSlug(s, target))
-    );
+    const targetSport = mapSportSlug(params.sportSlug);
+    orgs = orgs.filter((o) => o.sports.some((s) => s === targetSport));
   }
 
   // District filter: org has a venue in the requested district (exact match, no adjacency).
@@ -82,10 +82,4 @@ export async function getOrganizations(
   }
 
   return orgs;
-}
-
-// The app `Sport` values differ from DB slugs (e.g. "trail" vs "trail-running"); compare via the
-// same slug→Sport translation the mapper uses, so callers can pass a DB slug consistently.
-function sportMatchesSlug(appSport: Organization["sports"][number], slug: string): boolean {
-  return mapSportSlug(slug) === appSport;
 }

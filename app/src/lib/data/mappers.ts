@@ -153,13 +153,14 @@ function toHhMm(time: string): string {
 }
 
 function mapSchedule(s: DbScheduleRow): Schedule {
-  const level: Level = s.level_min ? mapUserLevel(s.level_min) : "principiante";
+  // No fabricated defaults (BR-016): a missing end_time or level_min stays undefined rather
+  // than guessing a value (e.g. "principiante") the source data never confirmed.
   return {
     day: mapDayOfWeek(s.day_of_week),
     startTime: toHhMm(s.start_time),
-    endTime: s.end_time ? toHhMm(s.end_time) : "",
+    endTime: s.end_time ? toHhMm(s.end_time) : undefined,
     sessionType: s.session_name ?? "",
-    level,
+    level: s.level_min ? mapUserLevel(s.level_min) : undefined,
   };
 }
 
