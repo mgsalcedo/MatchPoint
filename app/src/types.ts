@@ -7,7 +7,8 @@ export type OrgType =
   | "federation"
   | "event_organizer"
   | "academy"
-  | "community";
+  | "community"
+  | "other";
 
 export type Sport =
   | "running"
@@ -45,9 +46,9 @@ export type Weekday = "lun" | "mar" | "mie" | "jue" | "vie" | "sab" | "dom";
 export interface Schedule {
   day: Weekday;
   startTime: string;
-  endTime: string;
+  endTime?: string;
   sessionType: string;
-  level: Level;
+  level?: Level;
 }
 
 export interface AdnDeportivo {
@@ -71,6 +72,7 @@ export interface Organization {
   whatsapp?: string;
   instagram?: string;
   bookingLink?: string;
+  website?: string;
   adnDeportivo: AdnDeportivo;
   services: string[];
   coach?: string;
