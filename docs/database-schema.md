@@ -372,6 +372,7 @@ create table profile_claims (
 - Users can read their own leads.
 - Admin can manage all data.
 - Organization editing comes after profile claim approval.
+- Anonymous (`anon` role) clients may INSERT their own `match_sessions`/`match_results` rows (`user_id` must be null); there is no SELECT policy for either table — the client never reads a row back after writing it (migration `0009`, feature `002-sport-match-engine`).
 
 ## Migration order
 

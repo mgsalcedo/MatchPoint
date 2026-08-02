@@ -97,7 +97,7 @@ const GUIDE_MICROCOPY = [
 
 export function SportMatch() {
   const navigate = useNavigate();
-  const { updateAnswers, finalizeMatch } = useMatchSession();
+  const { answers, updateAnswers, finalizeMatch } = useMatchSession();
   const [step, setStep] = useState(0);
   const [draftDays, setDraftDays] = useState<Weekday[]>([]);
   const [matching, setMatching] = useState(false);
@@ -108,18 +108,26 @@ export function SportMatch() {
 
   const goToNext = useMemo(
     () => (value: unknown) => {
-      updateAnswers({ [question.key]: value } as Partial<SportMatchAnswers>);
+      const partial = { [question.key]: value } as Partial<SportMatchAnswers>;
+      updateAnswers(partial);
       if (isLast) {
         setMatching(true);
-        window.setTimeout(() => {
-          finalizeMatch();
+        // Build the fully-merged answers directly, rather than relying on `answers` from
+        // context state: React hasn't applied the updateAnswers() setState above yet at this
+        // point in the same synchronous handler, so `answers` here is still one question
+        // behind. Passing the merge explicitly to finalizeMatch avoids that stale read.
+        const finalAnswers = { ...answers, ...partial } as SportMatchAnswers;
+        // Real matching/persistence now runs async (Supabase-backed); keep the branded
+        // loading screen's minimum duration so a fast response doesn't flash past it.
+        const minDelay = new Promise((resolve) => window.setTimeout(resolve, 1500));
+        void Promise.all([finalizeMatch(finalAnswers), minDelay]).finally(() => {
           navigate("/match/results");
-        }, 1500);
+        });
         return;
       }
       setStep((s) => s + 1);
     },
-    [question.key, isLast, updateAnswers, finalizeMatch, navigate]
+    [question.key, isLast, answers, updateAnswers, finalizeMatch, navigate]
   );
 
   if (matching) {
