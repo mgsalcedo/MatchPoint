@@ -32,6 +32,33 @@ export type DbProfileStatus =
 
 export type DbUserLevel = "never_practiced" | "beginner" | "intermediate" | "advanced";
 
+// 002-sport-match-engine: vocabularies for writing match_sessions/match_results.
+export type DbMatchGoal =
+  | "start_sport"
+  | "prepare_race"
+  | "improve_performance"
+  | "stay_active"
+  | "lose_weight"
+  | "meet_people"
+  | "other";
+
+export type DbBudgetRange = "free" | "up_to_100" | "100_200" | "200_300" | "more_than_300" | "not_sure";
+
+export type DbMatchEnvironment =
+  | "competitive"
+  | "social"
+  | "recreational"
+  | "family"
+  | "high_performance"
+  | "inclusive";
+
+export type DbMatchLabel =
+  | "excellent_match"
+  | "very_good_match"
+  | "good_match"
+  | "possible_match"
+  | "weak_match";
+
 export interface DbSportRow {
   id: string;
   name: string;

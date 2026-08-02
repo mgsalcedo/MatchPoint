@@ -106,6 +106,26 @@ export function mapProfileStatus(status: DbProfileStatus): Organization["profile
   return PROFILE_STATUS_MAP[status] ?? "suspended";
 }
 
+// --- Reverse (app → DB) lookups for 002-sport-match-engine's session-write path. Derived from
+// the tables above rather than duplicated, so there is one source of truth per vocabulary
+// (docs/base-standards.md's no-duplicate-domain-logic rule). ---
+
+export function mapSportToSlug(sport: Sport): string | null {
+  return Object.entries(SPORT_SLUG_MAP).find(([, s]) => s === sport)?.[0] ?? null;
+}
+
+export function mapLevelToDb(level: Level): DbUserLevel {
+  const found = Object.entries(LEVEL_MAP).find(([, l]) => l === level)?.[0];
+  if (!found) throw new Error(`No DB user_level mapping for app Level "${level}"`);
+  return found as DbUserLevel;
+}
+
+export function mapWeekdayToDayOfWeek(day: Weekday): number {
+  const found = Object.entries(DAY_OF_WEEK_MAP).find(([, w]) => w === day)?.[0];
+  if (!found) throw new Error(`No day_of_week mapping for app Weekday "${day}"`);
+  return Number(found);
+}
+
 // DB ADN scores are 1-5 Likert; the app/mock and matching.ts use a 0-1 scale. Normalize
 // (1→0 … 5→1) so the eventual matching rewire (Milestone 3) keeps its 0-1 assumptions.
 // Null → 0 (safe default; not fabricated — absence maps to "no signal"). Flagged in research.md.

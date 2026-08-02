@@ -1,4 +1,4 @@
-import type { MatchLabel, MatchResult, Organization, SportMatchAnswers } from "../types";
+import type { Level, MatchLabel, MatchResult, Organization, SportMatchAnswers } from "../types";
 
 /**
  * Shell-stage placeholder scoring, isolated in one module per docs/base-standards.md's
@@ -94,8 +94,15 @@ function locationFit(answers: SportMatchAnswers, org: Organization): number {
 }
 
 function levelFit(answers: SportMatchAnswers, org: Organization): number {
-  if (org.schedules.length === 0) return 0.5;
-  const ranks = org.schedules.map((s) => LEVEL_RANK[s.level]);
+  // Schedules can legitimately have no confirmed level (BR-016 — no fabrication). Filter those
+  // out before ranking rather than letting an undefined rank poison Math.min into NaN, which
+  // silently fell through to the worst-case 0.15 for the WHOLE organization even when other
+  // schedules had a confirmed, well-matching level (research.md R2).
+  const ranks = org.schedules
+    .map((s) => s.level)
+    .filter((level): level is Level => level !== undefined)
+    .map((level) => LEVEL_RANK[level]);
+  if (ranks.length === 0) return 0.5; // no confirmed-level signal — neutral, not fabricated (BR-016)
   const userRank = LEVEL_RANK[answers.level];
   const minDistance = Math.min(...ranks.map((r) => Math.abs(r - userRank)));
   if (minDistance === 0) return 1;

@@ -1,12 +1,26 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MatchGuide } from "../components/MatchGuide";
 import { useMatchSession } from "../context/MatchSessionContext";
 import { accentColor } from "../lib/colors";
 import { badgeClass, SPORT_LABELS } from "../lib/labels";
+import { track } from "../lib/analytics";
 
 export function Results() {
   const navigate = useNavigate();
-  const { results, answers, resetMatch } = useMatchSession();
+  const { results, answers, resetMatch, matchSessionId } = useMatchSession();
+
+  // FR-008 / research.md R7: matched vs. no-match are distinct events, each fired once per
+  // mount (empty deps — re-renders within the same mount must not re-fire).
+  useEffect(() => {
+    if (!matchSessionId) return;
+    if (results.length > 0) {
+      track({ name: "results_viewed", matchSessionId, resultCount: results.length });
+    } else {
+      track({ name: "no_match_viewed", matchSessionId });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (results.length === 0) {
     return (

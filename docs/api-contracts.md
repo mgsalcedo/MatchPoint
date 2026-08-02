@@ -86,6 +86,8 @@ Response:
 
 Rules: store match session; store match results; return up to 5 results; exclude suspended or archived organizations.
 
+**Implementation note (`002-sport-match-engine`)**: implemented as a direct Supabase client insert from the browser (`anon` role, RLS-gated per migration `0009`), not a server route — see `app/src/lib/data/matchSessions.ts`. Matching itself runs client-side against `getOrganizations()` (`001-data-foundation`) before this write happens, so there is no separate "calculate" step on the server. The JSON shapes above describe the logical contract; the app's in-memory `SportMatchAnswers`/`MatchResult` types carry the same information and are translated to DB rows by `app/src/lib/data/sessionMappers.ts`.
+
 ## GET /api/organizations/:slug
 
 Returns public organization profile.
