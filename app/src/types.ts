@@ -56,6 +56,8 @@ export interface AdnDeportivo {
   competitiveness: number;
   socialAtmosphere: number;
   trainingIntensity: number;
+  performanceFocus: number;
+  inclusiveness: number;
   environments: Environment[];
 }
 

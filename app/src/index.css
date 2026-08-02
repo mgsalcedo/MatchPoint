@@ -147,6 +147,21 @@ p {
   transition: width 0.2s ease;
 }
 
+.adn-row {
+  margin-bottom: 10px;
+}
+
+.adn-label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.adn-bar-track {
+  height: 6px;
+  margin-bottom: 0;
+}
+
 .match-guide {
   display: flex;
   align-items: center;

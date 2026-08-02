@@ -155,6 +155,8 @@ function mapAdn(adn: DbAdnRow | null): AdnDeportivo {
       competitiveness: 0,
       socialAtmosphere: 0,
       trainingIntensity: 0,
+      performanceFocus: 0,
+      inclusiveness: 0,
       environments: ["recreativo"],
     };
   }
@@ -163,6 +165,8 @@ function mapAdn(adn: DbAdnRow | null): AdnDeportivo {
     competitiveness: normalizeScore(adn.competitiveness),
     socialAtmosphere: normalizeScore(adn.social_atmosphere),
     trainingIntensity: normalizeScore(adn.training_intensity_score),
+    performanceFocus: normalizeScore(adn.performance_focus),
+    inclusiveness: normalizeScore(adn.inclusiveness),
     environments: deriveEnvironments(adn),
   };
 }
