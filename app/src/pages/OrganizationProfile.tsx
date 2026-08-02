@@ -2,6 +2,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useMatchSession } from "../context/MatchSessionContext";
 import { accentColor } from "../lib/colors";
 import {
+  ADN_LABELS,
   badgeClass,
   BUDGET_LABELS,
   DAY_LABELS,
@@ -49,6 +50,12 @@ export function OrganizationProfile() {
     : organization.bookingLink
     ? { type: "booking_link", label: "Reservar clase" }
     : null;
+
+  // Website is deliberately NOT a Lead-generating contact action (BR-003 lists only WhatsApp,
+  // Instagram, booking, call, form) — it's a plain external link, no login/Lead gate. Only shown
+  // as a fallback when nothing else is available, so a website-only org (e.g. Club Regatas
+  // Unión) isn't left with a dead-end CTA.
+  const websiteOnly = !primaryContact && organization.website;
 
   function handleContact() {
     if (!primaryContact) return;
@@ -124,6 +131,25 @@ export function OrganizationProfile() {
         </div>
       </div>
 
+      <div className="section">
+        <div className="section-label">ADN Deportivo™</div>
+        {/* docs/component-library.md's CommunityADN: "do not show missing values; present as
+            personality, not ranking." A score of exactly 0 means the source had no signal for
+            that dimension (research.md R5's null→0 default) — not a real "1 of 5" — so it's
+            hidden rather than shown as an empty bar. */}
+        {ADN_LABELS.filter(({ key }) => organization.adnDeportivo[key] > 0).map(({ key, label }) => (
+          <div key={key} className="adn-row">
+            <span className="adn-label">{label}</span>
+            <div className="progress-track adn-bar-track">
+              <div
+                className="progress-fill"
+                style={{ width: `${Math.round((organization.adnDeportivo[key] as number) * 100)}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
       {organization.coach && (
         <div className="section">
           <div className="section-label">Coach</div>
@@ -157,6 +183,10 @@ export function OrganizationProfile() {
           <button className="btn btn-primary" onClick={handleContact}>
             {primaryContact.label}
           </button>
+        ) : websiteOnly ? (
+          <a className="btn btn-primary" href={organization.website} target="_blank" rel="noreferrer">
+            Visitar sitio web
+          </a>
         ) : (
           <button className="btn" disabled>
             Esta comunidad todavía no tiene un canal de contacto confirmado.

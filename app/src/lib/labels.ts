@@ -51,6 +51,16 @@ export const BUDGET_LABELS: Record<string, string> = {
   no_confirmado: "Precio no confirmado",
 };
 
+// docs/component-library.md's CommunityADN spec: readable labels, in this display order.
+export const ADN_LABELS: { key: keyof import("../types").AdnDeportivo; label: string }[] = [
+  { key: "beginnerFriendliness", label: "Ideal para principiantes" },
+  { key: "socialAtmosphere", label: "Ambiente social" },
+  { key: "competitiveness", label: "Competitividad" },
+  { key: "trainingIntensity", label: "Intensidad" },
+  { key: "performanceFocus", label: "Alto rendimiento" },
+  { key: "inclusiveness", label: "Inclusividad" },
+];
+
 export const ENVIRONMENT_LABELS: Record<string, string> = {
   competitivo: "Competitivo",
   social: "Social",

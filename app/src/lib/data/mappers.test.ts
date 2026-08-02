@@ -183,11 +183,14 @@ describe("mapOrganizationRow — shape parity (SC-006)", () => {
 
   it("normalizes ADN 1-5 scores to 0-1 and derives environments from thresholds", () => {
     const org = mapOrganizationRow(fixtureRow());
-    // beginner_friendly 5 → 1, competitiveness 2 → 0.25, social 5 → 1, intensity 3 → 0.5
+    // beginner_friendly 5 → 1, competitiveness 2 → 0.25, social 5 → 1, intensity 3 → 0.5,
+    // performance_focus 1 → 0, inclusiveness 4 → 0.75
     expect(org.adnDeportivo.beginnerFriendliness).toBe(1);
     expect(org.adnDeportivo.competitiveness).toBe(0.25);
     expect(org.adnDeportivo.socialAtmosphere).toBe(1);
     expect(org.adnDeportivo.trainingIntensity).toBe(0.5);
+    expect(org.adnDeportivo.performanceFocus).toBe(0);
+    expect(org.adnDeportivo.inclusiveness).toBe(0.75);
     // social_atmosphere 5 (>=4) → "social"; inclusiveness 4 (>=4) → "inclusivo"; others below 4
     expect(org.adnDeportivo.environments).toEqual(["social", "inclusivo"]);
   });
