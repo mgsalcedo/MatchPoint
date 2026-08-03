@@ -20,7 +20,11 @@ export function BrandMark({ layout = "inline", size = "md" }: BrandMarkProps) {
   // viewports, so if it held the accessible name the brand would become unnamed on small phones.
   return (
     <div className={layout === "stack" ? "brand-stack" : "brand"}>
-      <img className={markClass} src="/matchpoint-mark.png" alt="MatchPoint" />
+      <img
+        className={markClass}
+        src={`${import.meta.env.BASE_URL}matchpoint-mark.png`}
+        alt="MatchPoint"
+      />
       <span className="brand-wordmark" aria-hidden="true">
         MatchPoint
       </span>

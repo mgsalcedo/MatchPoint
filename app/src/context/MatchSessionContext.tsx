@@ -153,7 +153,8 @@ export function MatchSessionProvider({ children }: { children: ReactNode }) {
     // pick up the new session automatically (research.md R10).
     void supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      // BASE_URL carries the GitHub Pages subpath (e.g. "/MatchPoint/"); it's "/" everywhere else.
+      options: { redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}auth/callback` },
     });
   }, []);
 
