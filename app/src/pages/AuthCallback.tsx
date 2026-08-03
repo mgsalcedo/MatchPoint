@@ -57,8 +57,8 @@ export function AuthCallback() {
     return (
       <div className="screen text-center">
         <div className="spacer" />
-        <h2>Esta comunidad ya no está disponible.</h2>
-        <p>Ya iniciaste sesión — puedes volver a tus resultados y elegir otra comunidad.</p>
+        <h2>Uy, esta comunidad ya no está disponible.</h2>
+        <p>Ya iniciaste sesión — volvamos a tus resultados y elegimos otra.</p>
         <button className="btn btn-primary" onClick={() => navigate("/match/results")}>
           Volver a resultados
         </button>
@@ -71,8 +71,8 @@ export function AuthCallback() {
     return (
       <div className="screen text-center">
         <div className="spacer" />
-        <h2>No pudimos guardar tu contacto.</h2>
-        <p>Ya iniciaste sesión correctamente — solo falló el último paso. Intenta de nuevo.</p>
+        <h2>No se guardó tu contacto.</h2>
+        <p>Ya iniciaste sesión bien — solo falló el último paso. Dale, otra vez.</p>
         <button className="btn btn-primary" onClick={retry}>
           Reintentar
         </button>
@@ -88,7 +88,7 @@ export function AuthCallback() {
   return (
     <div className="screen text-center">
       <div className="spacer" />
-      <h2>Ya iniciaste sesión.</h2>
+      <h2>Ya estás dentro.</h2>
       <button className="btn btn-primary" onClick={() => navigate("/")}>
         Ir al inicio
       </button>

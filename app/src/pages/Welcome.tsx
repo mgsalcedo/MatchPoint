@@ -19,11 +19,8 @@ export function Welcome() {
         <div className="spacer" />
         <div className="rise-in">
           <MatchGuide text="Match™ · tu guía deportivo" />
-          <h1>Hola, soy Match™.</h1>
-          <p>
-            Te ayudo a encontrar una comunidad deportiva que encaje contigo. Tomará menos de un
-            minuto.
-          </p>
+          <h1>Hola, soy Match™, tu cómplice deportivo.</h1>
+          <p>Te ayudo a encontrar una comunidad que encaje contigo. Toma menos de un minuto, lo prometo.</p>
         </div>
         <div className="spacer" />
         <button

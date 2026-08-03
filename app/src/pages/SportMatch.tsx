@@ -20,6 +20,10 @@ type SingleQuestion = {
   key: keyof SportMatchAnswers;
   type: "single";
   title: string;
+  // 008-jovial-tone research.md R1: documented per-question in docs/microcopy.md since that
+  // doc's creation, never rendered until now — a plain paragraph under the title, not a new
+  // component.
+  helper?: string;
   options: { value: string; label: string }[];
 };
 
@@ -27,6 +31,7 @@ type MultiQuestion = {
   key: keyof SportMatchAnswers;
   type: "multi";
   title: string;
+  helper?: string;
   options: { value: string; label: string }[];
 };
 
@@ -37,42 +42,49 @@ const QUESTIONS: Question[] = [
     key: "goal",
     type: "single",
     title: "¿Qué quieres lograr?",
+    helper: "Arranquemos por tu objetivo — el deporte viene después.",
     options: Object.entries(GOAL_LABELS).map(([value, label]) => ({ value, label })),
   },
   {
     key: "sport",
     type: "single",
     title: "¿Qué deporte te interesa?",
+    helper: "El que se te venga primero a la mente — confía en tu instinto.",
     options: Object.entries(SPORT_LABELS).map(([value, label]) => ({ value, label })),
   },
   {
     key: "district",
     type: "single",
     title: "¿Dónde te gustaría entrenar?",
+    helper: "Cerca de casa, del trabajo, o donde se te haga más fácil llegar.",
     options: DISTRICTS.map((d) => ({ value: d, label: d })),
   },
   {
     key: "days",
     type: "multi",
     title: "¿Qué días puedes entrenar?",
+    helper: "Puedes marcar más de uno — entre más, mejor combo te armo.",
     options: Object.entries(DAY_LABELS).map(([value, label]) => ({ value, label })),
   },
   {
     key: "time",
     type: "single",
     title: "¿En qué horario prefieres entrenar?",
+    helper: "Mañana, tarde o noche — tú mandas.",
     options: Object.entries(TIME_LABELS).map(([value, label]) => ({ value, label })),
   },
   {
     key: "level",
     type: "single",
     title: "¿Cuál es tu nivel?",
+    helper: "Acá no hay respuesta incorrecta — esto es para cuidarte, no para juzgarte.",
     options: Object.entries(LEVEL_LABELS).map(([value, label]) => ({ value, label })),
   },
   {
     key: "budget",
     type: "single",
     title: "¿Cuánto quieres invertir al mes?",
+    helper: "Sin sorpresas después — dinos tu rango real.",
     options: Object.entries(BUDGET_LABELS)
       .filter(([value]) => value !== "no_confirmado")
       .map(([value, label]) => ({ value, label })),
@@ -81,19 +93,20 @@ const QUESTIONS: Question[] = [
     key: "environment",
     type: "single",
     title: "¿Qué ambiente buscas?",
+    helper: "El ambiente pesa tanto como el entrenamiento mismo.",
     options: Object.entries(ENVIRONMENT_LABELS).map(([value, label]) => ({ value, label })),
   },
 ];
 
 const GUIDE_MICROCOPY = [
-  "Empecemos por lo más importante: tu meta.",
-  "Ahora cuéntame qué deporte tienes en mente.",
-  "Vamos a ubicarte.",
-  "Cuadremos esto con tu semana.",
-  "Casi listos.",
-  "Quiero recomendarte algo a tu nivel.",
-  "Sin sorpresas de presupuesto.",
-  "Última pregunta, lo prometo.",
+  "Arranquemos por lo importante: ¿qué quieres lograr?",
+  "Ahora sí, hablemos de deporte. ¿Cuál tienes en mente?",
+  "Ubiquémonos. ¿Por dónde te queda bien entrenar?",
+  "El horario también cuenta. ¿Qué días te sirven?",
+  "Ya casi. Solo falta el horario.",
+  "Acá no hay respuesta incorrecta — esto es para cuidarte, no para juzgarte.",
+  "Hablemos de presupuesto, sin sorpresas.",
+  "Última pregunta, lo prometo — y es una importante.",
 ];
 
 // 006-no-empty-results FR-009: derived, not hardcoded, so a future reorder of QUESTIONS doesn't
@@ -160,7 +173,7 @@ export function SportMatch() {
         >
           M
         </div>
-        <h2>Estoy buscando comunidades que realmente encajen contigo...</h2>
+        <h2>Estoy cruzando tu objetivo, horario y ubicación para armarte un buen combo...</h2>
         <div className="spacer" />
       </div>
     );
@@ -181,6 +194,7 @@ export function SportMatch() {
       <div key={step} className="question-block rise-in">
         <MatchGuide text={GUIDE_MICROCOPY[step]} />
         <h2>{question.title}</h2>
+        {question.helper && <p>{question.helper}</p>}
 
         {question.type === "single" && (
           <div className="option-list">

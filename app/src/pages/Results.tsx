@@ -93,8 +93,8 @@ export function Results() {
       <MatchGuide text="Match™" />
       <h1>Tu Match está listo.</h1>
       <p>
-        Estas son las comunidades de {answers.sport ? SPORT_LABELS[answers.sport] : "tu deporte"} que más se
-        parecen a lo que buscas.
+        Estas comunidades de {answers.sport ? SPORT_LABELS[answers.sport] : "tu deporte"} tienen pinta de
+        encajar contigo.
       </p>
 
       {renderCard(topResult, 1, true)}

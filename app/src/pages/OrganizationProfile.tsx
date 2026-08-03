@@ -45,7 +45,7 @@ export function OrganizationProfile() {
     return (
       <div className="screen text-center">
         <div className="spacer" />
-        <h2>Esta comunidad ya no está disponible o está pendiente de verificación.</h2>
+        <h2>Uy, esta comunidad no está disponible o todavía la estamos revisando.</h2>
         <button className="btn" onClick={() => navigate("/match/results")}>
           Volver a resultados
         </button>
@@ -231,12 +231,12 @@ export function OrganizationProfile() {
       <div className="sticky-footer">
         {contactState === "org_unavailable" && (
           <p className="text-center" style={{ marginBottom: 8 }}>
-            Esta comunidad ya no está disponible para contactar.
+            Uy, esta comunidad ya no está disponible para contactar.
           </p>
         )}
         {contactState === "lead_failed" && (
           <p className="text-center" style={{ marginBottom: 8 }}>
-            No pudimos guardar tu contacto. Intenta de nuevo.
+            No se guardó tu contacto. Dale, otra vez.
           </p>
         )}
         {primaryContact ? (
