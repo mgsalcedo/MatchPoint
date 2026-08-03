@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useMatchSession } from "../context/MatchSessionContext";
 import { accentColor } from "../lib/colors";
+import { track } from "../lib/analytics";
 import {
   ADN_LABELS,
   badgeClass,
@@ -32,6 +33,13 @@ export function OrganizationProfile() {
   const resultRank = (location.state as { resultRank?: number } | null)?.resultRank ?? null;
   const matchResult = results.find((r) => r.organization.id === id);
 
+  // Guarded on organization actually resolving — the "no longer available" branch below is a
+  // failed lookup, not a successful profile open (research.md R9, 005-analytics-funnel).
+  useEffect(() => {
+    if (organization) track({ name: "profile_opened", organizationId: organization.id, resultRank });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organization?.id]);
+
   if (!organization) {
     return (
       <div className="screen text-center">
@@ -61,6 +69,10 @@ export function OrganizationProfile() {
 
   async function handleContact() {
     if (!primaryContact) return;
+    // Recorded independent of and prior to knowing the outcome (login redirect, immediate
+    // success, org-unavailable, or lead-save failure all follow this line) — FR-002,
+    // research.md R9, 005-analytics-funnel.
+    track({ name: "contact_clicked", organizationId: organization.id, contactType: primaryContact.type, resultRank });
     setContactState("sending");
     const outcome = await requestContact(
       organization!,
