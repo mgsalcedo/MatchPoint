@@ -22,21 +22,23 @@ export function Results() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 006-no-empty-results FR-005/R2: post-fix, calculateMatches() only returns zero results when
+  // zero organizations in the catalog offer the requested sport at all — never because the
+  // user's other answers produced only weak fits (those are now always shown, honestly labeled).
+  // Deliberately does NOT call resetMatch(): the other answers (goal, district, days, etc.) are
+  // still valid and stay in context — only the sport is provably the blocker here (FR-009).
   if (results.length === 0) {
     return (
       <div className="screen text-center">
         <div className="spacer" />
         <MatchGuide text="Match™" />
-        <h2>No encontré un match perfecto todavía, pero puedo intentar de otra forma.</h2>
-        <p>Prueba ampliando tu distrito, cambiando de horario o explorando otro deporte.</p>
+        <h2>Todavía no tenemos comunidades de este deporte.</h2>
+        <p>No es algo que puedas resolver cambiando tus otras respuestas — elige otro deporte y sigo buscando.</p>
         <button
           className="btn btn-primary"
-          onClick={() => {
-            resetMatch();
-            navigate("/match");
-          }}
+          onClick={() => navigate("/match", { state: { startAt: "sport" } })}
         >
-          Intentar de nuevo
+          Elegir otro deporte
         </button>
         <div className="spacer" />
       </div>
@@ -75,6 +77,18 @@ export function Results() {
           </button>
         </div>
       ))}
+
+      {/* 006-no-empty-results FR-008: always visible, regardless of match quality — a user with
+          only "Weak Match" results should be able to change any answer, not just the sport. */}
+      <button
+        className="link-button"
+        onClick={() => {
+          resetMatch();
+          navigate("/match");
+        }}
+      >
+        Cambiar mis respuestas
+      </button>
     </div>
   );
 }

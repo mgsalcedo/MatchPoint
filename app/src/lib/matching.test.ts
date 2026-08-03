@@ -109,8 +109,12 @@ describe("calculateMatches — shape-integration smoke test", () => {
   });
 });
 
-describe("calculateMatches — no strong match (FR-005, research.md)", () => {
-  it("returns an empty array, never partial/invalid entries, when nothing has a reason", () => {
+describe("calculateMatches — wrong sport is always excluded (FR-002, 006-no-empty-results)", () => {
+  // This fixture offers natacion while the user asked for triatlon — it was previously labeled
+  // "no strong match," but it's actually exercising sport exclusion, not a weak-match-everywhere
+  // case (006-no-empty-results research.md R6). The old assertion was vacuously true (results
+  // happened to be empty for unrelated reasons); this one is true *because* of the sport filter.
+  it("returns an empty array — the org doesn't offer the requested sport, regardless of any other fit", () => {
     const org = fixtureOrg({
       sports: ["natacion"],
       districts: ["Ventanilla"],
@@ -128,9 +132,86 @@ describe("calculateMatches — no strong match (FR-005, research.md)", () => {
     });
     const answers = fixtureAnswers({ sport: "triatlon", district: "San Isidro", environment: "competitivo" });
     const results = calculateMatches(answers, [org]);
-    expect(Array.isArray(results)).toBe(true);
-    for (const r of results) {
-      expect(r.reasons.length).toBeGreaterThan(0);
-    }
+    expect(results).toHaveLength(0);
+  });
+});
+
+describe("calculateMatches — sport eligibility gate (FR-002, 006-no-empty-results)", () => {
+  it("excludes an organization that scores well on every other dimension but doesn't offer the requested sport", () => {
+    const wrongSportOrg = fixtureOrg({
+      sports: ["natacion"], // user wants triatlon
+      districts: ["San Isidro"],
+      schedules: [{ day: "mar", startTime: "06:00", endTime: "07:00", sessionType: "Grupal", level: "principiante" }],
+      priceRange: "no_confirmado",
+    });
+    const answers = fixtureAnswers({ sport: "triatlon", district: "San Isidro", days: ["mar"], time: "manana" });
+    const results = calculateMatches(answers, [wrongSportOrg]);
+    expect(results).toHaveLength(0);
+  });
+
+  it("never lets a wrong-sport organization outrank a correctly-sport-matching one", () => {
+    const wrongSportButOtherwiseStrong = fixtureOrg({ id: "org-wrong", sports: ["natacion"], districts: ["San Isidro"] });
+    const rightSportButWeak = fixtureOrg({ id: "org-right", sports: ["triatlon"], districts: ["Ventanilla"] });
+    const answers = fixtureAnswers({ sport: "triatlon", district: "San Isidro" });
+    const results = calculateMatches(answers, [wrongSportButOtherwiseStrong, rightSportButWeak]);
+    expect(results.map((r) => r.organization.id)).toEqual(["org-right"]);
+  });
+});
+
+describe("calculateMatches — sport-matching org is never dropped for lacking other reasons (FR-001, FR-003)", () => {
+  it("includes a sport-matching org that scores weakly on every other dimension, with the sport itself as its one reason", () => {
+    const weakButRightSport = fixtureOrg({
+      sports: ["running"],
+      districts: ["Ventanilla"], // far from user's district, not adjacent
+      schedules: [],
+      priceRange: "mas_300",
+      trialClassAvailable: false,
+      adnDeportivo: {
+        beginnerFriendliness: 0,
+        competitiveness: 0,
+        socialAtmosphere: 0,
+        trainingIntensity: 0,
+        performanceFocus: 0,
+        inclusiveness: 0,
+        environments: ["alto_rendimiento"],
+      },
+    });
+    const answers = fixtureAnswers({ sport: "running", district: "San Isidro", environment: "social", budget: "gratis", goal: "conocer_gente" });
+    const results = calculateMatches(answers, [weakButRightSport]);
+    expect(results).toHaveLength(1);
+    expect(results[0].reasons).toEqual(["Ofrece running."]);
+    expect(results[0].label).toBe("Weak Match");
+  });
+
+  it("does not append the sport reason when real reasons already exist (no regression)", () => {
+    const strongOrg = fixtureOrg(); // fixtureOrg's defaults already produce real reasons per the existing smoke test
+    const results = calculateMatches(fixtureAnswers(), [strongOrg]);
+    expect(results[0].reasons.some((r) => r.startsWith("Ofrece "))).toBe(false);
+  });
+});
+
+describe("calculateMatches — true-empty-catalog signal (FR-005, 006-no-empty-results)", () => {
+  it("returns an empty array when zero organizations in the catalog offer the requested sport, even if organizations exist for other sports", () => {
+    const orgs = [fixtureOrg({ sports: ["natacion"] }), fixtureOrg({ id: "org-2", sports: ["ciclismo"] })];
+    const results = calculateMatches(fixtureAnswers({ sport: "triatlon" }), orgs);
+    expect(results).toHaveLength(0);
+  });
+
+  it("returns at least one result whenever at least one organization offers the requested sport, regardless of how poorly it scores otherwise", () => {
+    const orgs = [
+      fixtureOrg({ id: "org-wrong", sports: ["natacion"] }),
+      fixtureOrg({ id: "org-right", sports: ["triatlon"], districts: ["Ventanilla"], schedules: [] }),
+    ];
+    const results = calculateMatches(fixtureAnswers({ sport: "triatlon" }), orgs);
+    expect(results.length).toBeGreaterThanOrEqual(1);
+    expect(results.some((r) => r.organization.id === "org-right")).toBe(true);
+  });
+});
+
+describe("calculateMatches — 5-result cap unchanged (FR-007)", () => {
+  it("still caps at 5 results when more than 5 organizations offer the requested sport", () => {
+    const orgs = Array.from({ length: 7 }, (_, i) => fixtureOrg({ id: `org-${i}`, sports: ["running"] }));
+    const results = calculateMatches(fixtureAnswers({ sport: "running" }), orgs);
+    expect(results).toHaveLength(5);
   });
 });

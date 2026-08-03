@@ -1,4 +1,5 @@
 import type { Level, MatchLabel, MatchResult, Organization, SportMatchAnswers } from "../types";
+import { SPORT_LABELS } from "./labels";
 
 /**
  * Shell-stage placeholder scoring, isolated in one module per docs/base-standards.md's
@@ -151,11 +152,30 @@ function reasonsFor(answers: SportMatchAnswers, org: Organization, fits: Record<
   if (fits.goal >= 0.75) reasons.push("Está alineado con tu objetivo.");
   if (org.trialClassAvailable) reasons.push("Ofrece clase de prueba.");
   if (fits.budget >= 1) reasons.push("El precio está dentro de tu presupuesto.");
+
+  // 006-no-empty-results FR-003: sport is scored (fits.sport, weighted into WEIGHTS.sport) but
+  // never produced a reason of its own. Fallback-only — only backfilled when it's genuinely one
+  // of the few (or only) true things going for a weak-scoring organization — so orgs that already
+  // have real reasons keep exactly the same reasons list as before (no regression). The
+  // `fits.sport >= 1` guard is defensive: calculateMatches only calls this on sport-eligible orgs
+  // post-fix, so it's always true here, but it protects any future caller from fabricating a
+  // sport reason for an org that doesn't actually offer it (BR-016).
+  if (reasons.length === 0 && fits.sport >= 1) {
+    reasons.push(`Ofrece ${SPORT_LABELS[answers.sport].toLowerCase()}.`);
+  }
+
   return reasons.slice(0, 5);
 }
 
 export function calculateMatches(answers: SportMatchAnswers, organizations: Organization[]): MatchResult[] {
-  const scored = organizations.map((org) => {
+  // 006-no-empty-results FR-002: an organization that does not offer the requested sport is
+  // never eligible, regardless of how well it scores on every other dimension — "closest
+  // available" never means "wrong sport." This filter is new: previously nothing in this
+  // function hard-excluded on fits.sport, so a wrong-sport org could leak into results if it
+  // scored well enough on location/schedule/budget to produce reasons on its own.
+  const eligible = organizations.filter((org) => sportFit(answers, org) > 0);
+
+  const scored = eligible.map((org) => {
     const fits = {
       goal: goalFit(answers, org),
       sport: sportFit(answers, org),
@@ -179,8 +199,10 @@ export function calculateMatches(answers: SportMatchAnswers, organizations: Orga
     return { organization: org, score, label: labelFor(score), reasons };
   });
 
-  return scored
-    .filter((r) => r.reasons.length > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5);
+  // 006-no-empty-results FR-001: no longer filtered by reasons.length > 0 — an organization that
+  // offers the requested sport is always shown, even if it scores weakly on every other
+  // dimension. reasonsFor() guarantees at least the sport-offer reason in that case (FR-003).
+  // Post-fix, an empty return here is an unambiguous signal that zero organizations in the
+  // catalog offer the requested sport at all (research.md R2).
+  return scored.sort((a, b) => b.score - a.score).slice(0, 5);
 }

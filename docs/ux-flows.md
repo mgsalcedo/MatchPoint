@@ -67,11 +67,11 @@ Headline: "Tu Match está listo." Subheadline: "Estas son las comunidades que m�
 
 Each result card: organization name, sport, district, match label, 3 reasons, main image/logo, primary CTA "Ver comunidad".
 
-Rules: show up to 5 results; do not show raw percentages as primary UI, use "Excellent Match" / "Very Good Match" / "Good Match" labels; every result must include reasons; if fewer than 3 results exist, show closest matches and explain.
+Rules: show up to 5 results; do not show raw percentages as primary UI, use "Excellent Match" / "Very Good Match" / "Good Match" labels; every result must include reasons; if fewer than 3 results exist, show closest matches and explain. A persistent "Cambiar mis respuestas" secondary action is always visible below the results list, regardless of match quality (`006-no-empty-results` FR-008) — resets and returns to Sport Match™'s first question.
 
 ### No-results flow
 
-Trigger: no organization matches criteria above minimum threshold. Copy: "No encontré un match perfecto todavía, pero estas son las opciones más cercanas." Actions: expand district, change schedule, try another sport, notify me when new communities appear. Never show an empty dead-end screen — always provide a next action.
+Trigger (narrowed, `006-no-empty-results`): zero organizations in the catalog offer the requested sport at all — not "weak matches exist," which is no longer a no-results case (those are always shown, honestly labeled). Copy: "Todavía no tenemos comunidades de este deporte." Action: "Elegir otro deporte" only — returns to the sport question specifically (not a full restart), keeping other already-answered context. Expand-district/change-schedule/notify-me are removed: none of those help when the gap is sport coverage, not answer shape. Never show an empty dead-end screen — always provide a next action.
 
 ## Flow 4: Community profile
 

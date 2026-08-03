@@ -80,6 +80,8 @@ function calculateMatch(user, organization):
 
 Each fit function returns a value between 0 and 1. Centralize this logic in one module per `docs/base-standards.md` — never reimplement scoring rules per endpoint.
 
+**Sport is a hard eligibility gate, not just a weighted term** (`006-no-empty-results`): an organization that does not offer the user's selected sport is excluded from scoring entirely — `sportFit = 0` is not merely down-weighted 20%, it removes the organization from consideration outright. "Closest available" never means "wrong sport."
+
 ### Variable definitions
 
 - **Goal fit** — is the organization appropriate for the user's desired outcome (e.g. prepare race → structured training + coaches + race experience; meet people → social/community-oriented groups; lose weight → training centers/functional classes/beginner-friendly; improve performance → advanced teams/certified coaches; start a sport → beginner-friendly + trial class).
@@ -120,10 +122,14 @@ Templates:
 - Goal — "Helps people prepare for races." / "Good option if you want to start a sport." / "Aligned with your goal of improving performance."
 - Environment — "Has a social atmosphere." / "Strong fit for a competitive environment." / "Ideal for recreational training."
 - Budget — "Fits your monthly budget." / "Offers a free or trial class." / "Pricing is within your selected range."
+- Sport — "Ofrece {sport}." — used only as a fallback, when no other dimension produced a reason (`006-no-empty-results`). An organization that offers the requested sport is never excluded just for lacking other reasons; this is its honest, minimum guaranteed reason.
 
 ## No-match case
 
-Never show an empty dead-end state. If there are no strong matches: "No encontré un match perfecto todavía, pero estas son las opciones más cercanas." Then offer: expand district, change schedule, include nearby sports, notify me when new communities appear.
+Two genuinely different states, not one (`006-no-empty-results` split these apart — this section previously conflated them):
+
+1. **Weak-but-real matches exist.** As of `006-no-empty-results`, this is no longer a no-match case at all — any organization offering the requested sport is always shown, ranked and honestly labeled (including "Weak Match" when that's the truth), with at least the sport-offer reason. Never show an empty dead-end state for this case; there isn't one anymore.
+2. **Zero organizations offer the requested sport.** This is the only remaining true no-match case. Its one actionable next step is choosing a different sport — expanding district, changing schedule, or notifying-when-available don't help when the gap is sport coverage, not answer shape. See `docs/microcopy.md` for the exact copy.
 
 ## Missing data rules
 
@@ -163,8 +169,8 @@ After contact: "¿Sentiste que fue un buen match?" (Yes / Not really / I did not
 
 ## Edge cases
 
-- User selects low budget and all organizations are paid → show closest options, label price clearly.
-- User selects beginner and only advanced groups exist → warn "These communities may be more advanced than your current level."
+- User selects low budget and all organizations are paid → show closest options, label price clearly. (`006-no-empty-results` is what actually makes this true in code — previously aspirational.)
+- User selects beginner and only advanced groups exist → warn "These communities may be more advanced than your current level." (Same — `006-no-empty-results` is the fix that stops these organizations from being silently dropped.)
 - User wants to meet people but selects an individual coach → rank group communities higher unless the coach offers group sessions.
 - Organization has no schedule → lower ranking, prompt organization to complete profile.
 - User selects Callao and few results exist → allow nearby Lima districts.
