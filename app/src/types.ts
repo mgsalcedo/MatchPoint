@@ -100,30 +100,27 @@ export type MatchLabel =
   | "Weak Match";
 
 export interface MatchResult {
+  id?: string; // set only once the underlying match_results row is actually persisted
   organization: Organization;
   score: number;
   label: MatchLabel;
   reasons: string[];
 }
 
-export type ContactType =
-  | "whatsapp"
-  | "instagram"
-  | "booking_link"
-  | "call"
-  | "contact_form"
-  | "trial_class_request";
+// Matches the DB's contact_type enum exactly (docs/database-schema.md) — no translation
+// table needed (research.md R6, 004-auth-lead-creation). "call"/"form" are real BR-003
+// contact actions with DB backing, kept even though no UI wires them up yet.
+export type ContactType = "whatsapp" | "instagram" | "booking" | "call" | "form";
 
+// Matches the DB's lead_source enum exactly (research.md R7).
+export type LeadSource = "result_card" | "organization_profile" | "event_profile" | "direct_search" | "admin_test";
+
+// UI-facing shape — only what ContactSuccess.tsx actually displays. The DB-shaped insert row
+// (LeadInsertRow, app/src/lib/data/leadMappers.ts) is a separate type, mirroring the existing
+// MatchSession/MatchSessionInsertRow split (research.md, backend.md §7.4).
 export interface Lead {
   id: string;
-  userId: string;
   organizationId: string;
-  matchSessionId: string;
   contactType: ContactType;
-  source: string;
-  timestamp: string;
-  sport: Sport;
-  goal: Goal;
-  district: string;
-  resultRank: number;
+  createdAt: string;
 }

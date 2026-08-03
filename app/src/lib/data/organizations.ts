@@ -47,6 +47,45 @@ function meetsMinimumDataset(org: Organization): boolean {
   );
 }
 
+export interface OrgContactSnapshot {
+  id: string;
+  name: string;
+  whatsapp?: string;
+  instagram?: string;
+  bookingLink?: string;
+  website?: string;
+}
+
+/**
+ * FR-013 (004-auth-lead-creation): single-row re-check that an organization is still publicly
+ * contactable, immediately before a Lead insert — not a full getOrganizations() re-fetch, which
+ * would re-run the whole catalog query + eligibility filter for one row. Also doubles as the
+ * data needed to rebuild the external contact URL after the OAuth full-page reload (research.md
+ * R11), since state.results is empty at that point.
+ */
+export async function getOrganizationContactSnapshot(id: string): Promise<OrgContactSnapshot | null> {
+  const { data, error } = await supabase
+    .from("organizations")
+    .select("id, name, whatsapp_number, instagram_url, booking_url, website_url, is_active, profile_status")
+    .eq("id", id)
+    .eq("is_active", true)
+    .not("profile_status", "in", "(suspended,archived,rejected)")
+    .maybeSingle();
+
+  // RLS already hides a suspended/archived/rejected row even without these explicit filters —
+  // kept for self-documentation, matching getOrganizations()'s existing style (research.md R12).
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    name: data.name,
+    whatsapp: data.whatsapp_number ?? undefined,
+    instagram: data.instagram_url ?? undefined,
+    bookingLink: data.booking_url ?? undefined,
+    website: data.website_url ?? undefined,
+  };
+}
+
 export async function getOrganizations(
   params: GetOrganizationsParams = {}
 ): Promise<Organization[]> {

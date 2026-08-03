@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useMatchSession } from "../context/MatchSessionContext";
 import { accentColor } from "../lib/colors";
@@ -25,9 +26,10 @@ export function OrganizationProfile() {
   const navigate = useNavigate();
   const location = useLocation();
   const { getOrganization, results, requestContact } = useMatchSession();
+  const [contactState, setContactState] = useState<"idle" | "sending" | "org_unavailable" | "lead_failed">("idle");
 
   const organization = id ? getOrganization(id) : undefined;
-  const resultRank = (location.state as { resultRank?: number } | null)?.resultRank ?? 0;
+  const resultRank = (location.state as { resultRank?: number } | null)?.resultRank ?? null;
   const matchResult = results.find((r) => r.organization.id === id);
 
   if (!organization) {
@@ -48,7 +50,7 @@ export function OrganizationProfile() {
     : organization.instagram
     ? { type: "instagram", label: "Contactar por Instagram" }
     : organization.bookingLink
-    ? { type: "booking_link", label: "Reservar clase" }
+    ? { type: "booking", label: "Reservar clase" }
     : null;
 
   // Website is deliberately NOT a Lead-generating contact action (BR-003 lists only WhatsApp,
@@ -57,13 +59,29 @@ export function OrganizationProfile() {
   // Unión) isn't left with a dead-end CTA.
   const websiteOnly = !primaryContact && organization.website;
 
-  function handleContact() {
+  async function handleContact() {
     if (!primaryContact) return;
-    const proceeded = requestContact(organization!, primaryContact.type, resultRank, "organization_profile");
-    if (proceeded) {
-      navigate("/contact/success");
-    } else {
-      navigate("/login");
+    setContactState("sending");
+    const outcome = await requestContact(
+      organization!,
+      primaryContact.type,
+      resultRank,
+      "organization_profile",
+      matchResult?.id ?? null
+    );
+    switch (outcome.status) {
+      case "login_required":
+        navigate("/login");
+        return;
+      case "success":
+        navigate("/contact/success");
+        return;
+      case "org_unavailable":
+        setContactState("org_unavailable");
+        return;
+      case "lead_failed":
+        setContactState("lead_failed");
+        return;
     }
   }
 
@@ -179,9 +197,19 @@ export function OrganizationProfile() {
       )}
 
       <div className="sticky-footer">
+        {contactState === "org_unavailable" && (
+          <p className="text-center" style={{ marginBottom: 8 }}>
+            Esta comunidad ya no está disponible para contactar.
+          </p>
+        )}
+        {contactState === "lead_failed" && (
+          <p className="text-center" style={{ marginBottom: 8 }}>
+            No pudimos guardar tu contacto. Intenta de nuevo.
+          </p>
+        )}
         {primaryContact ? (
-          <button className="btn btn-primary" onClick={handleContact}>
-            {primaryContact.label}
+          <button className="btn btn-primary" onClick={handleContact} disabled={contactState === "sending"}>
+            {contactState === "sending" ? "Enviando..." : primaryContact.label}
           </button>
         ) : websiteOnly ? (
           <a className="btn btn-primary" href={organization.website} target="_blank" rel="noreferrer">

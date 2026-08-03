@@ -11,7 +11,10 @@ import type { Budget, Environment, Goal, MatchLabel, MatchResult, SportMatchAnsw
 import { mapLevelToDb, mapWeekdayToDayOfWeek } from "./mappers";
 import type { DbBudgetRange, DbMatchEnvironment, DbMatchGoal, DbMatchLabel } from "./types";
 
-const GOAL_MAP: Record<Goal, DbMatchGoal> = {
+// Exported (not module-private) so leadMappers.ts (004-auth-lead-creation) reuses this same
+// vocabulary for leads.goal instead of duplicating it — one shared Spanish→English goal
+// mapping, not a second copy (research.md §6.1's no-duplicate-domain-logic rule).
+export const GOAL_MAP: Record<Goal, DbMatchGoal> = {
   empezar: "start_sport",
   preparar_carrera: "prepare_race",
   mejorar_rendimiento: "improve_performance",
@@ -55,7 +58,7 @@ const TIME_OF_DAY_MAP: Record<TimeOfDay, string> = { manana: "morning", tarde: "
 // or cross-session correlation feature exists). See research.md R9 before adding it back.
 export interface MatchSessionInsertRow {
   id: string;
-  user_id: null;
+  user_id: string | null;
   goal: DbMatchGoal;
   sport_id: string;
   district_id: string;
@@ -70,11 +73,15 @@ export function buildMatchSessionRow(
   id: string,
   answers: SportMatchAnswers,
   sportId: string,
-  districtId: string
+  districtId: string,
+  userId?: string | null
 ): MatchSessionInsertRow {
   return {
     id,
-    user_id: null, // anon-only this milestone; RLS enforces this (migration 0009)
+    // Anonymous by default (RLS: migration 0009). If the user is already logged in when the
+    // session is created, attribute it to them (migration 0011, research.md R4) — this does
+    // NOT retroactively link a session created earlier while anonymous; that stays out of scope.
+    user_id: userId ?? null,
     goal: GOAL_MAP[answers.goal],
     sport_id: sportId,
     district_id: districtId,
@@ -87,6 +94,7 @@ export function buildMatchSessionRow(
 }
 
 export interface MatchResultInsertRow {
+  id: string;
   match_session_id: string;
   organization_id: string;
   score: number;
@@ -95,8 +103,12 @@ export interface MatchResultInsertRow {
   reasons: string[];
 }
 
+// id is client-generated (crypto.randomUUID()), not left to the DB default — match_results has
+// no SELECT policy (002's research.md R1), so a DB-generated id could never be read back. A Lead
+// needs to reference the exact result it came from (research.md R8, 004-auth-lead-creation).
 export function buildMatchResultRows(matchSessionId: string, results: MatchResult[]): MatchResultInsertRow[] {
   return results.map((r, i) => ({
+    id: crypto.randomUUID(),
     match_session_id: matchSessionId,
     organization_id: r.organization.id,
     score: r.score,

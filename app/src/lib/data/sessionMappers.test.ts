@@ -111,8 +111,13 @@ describe("buildMatchResultRows — rank assignment (1-based, input order)", () =
   it("assigns 1-based ranks in the same order as the input array", () => {
     const rows = buildMatchResultRows("session-1", fakeResults);
     expect(rows).toEqual([
-      { match_session_id: "session-1", organization_id: "org-a", score: 92, label: "excellent_match", rank: 1, reasons: ["r1"] },
-      { match_session_id: "session-1", organization_id: "org-b", score: 60, label: "good_match", rank: 2, reasons: ["r2"] },
+      { id: expect.any(String), match_session_id: "session-1", organization_id: "org-a", score: 92, label: "excellent_match", rank: 1, reasons: ["r1"] },
+      { id: expect.any(String), match_session_id: "session-1", organization_id: "org-b", score: 60, label: "good_match", rank: 2, reasons: ["r2"] },
     ]);
+  });
+
+  it("generates a distinct client-side id per row (research.md R8, 004-auth-lead-creation)", () => {
+    const rows = buildMatchResultRows("session-1", fakeResults);
+    expect(rows[0].id).not.toBe(rows[1].id);
   });
 });

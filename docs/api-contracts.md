@@ -151,6 +151,8 @@ Response:
 
 Rules: create the Lead before returning the redirect URL; validate the requested contact method exists; validate the user is authenticated; preserve match context (BR-014).
 
+**Implementation note (`004-auth-lead-creation`)**: implemented as a direct Supabase client insert from the browser (`authenticated` role, RLS-gated by the already-shipped `authenticated_insert_leads` policy from `001-data-foundation`), not a server route — see `app/src/lib/data/leads.ts`. `id` is client-generated; `matchSessionId`/`matchResultId` may be `null` when the underlying session/result was never actually persisted (never a dangling reference). The organization's contactability is re-verified immediately before the insert (FR-013) via `getOrganizationContactSnapshot()`, which also supplies the redirect URL — no separate "validate contact method" step. User provisioning (a `users` row on first login) has no dedicated REST-shaped contract here — it's a client-side upsert (`app/src/lib/data/users.ts`), not a new endpoint.
+
 ## POST /api/profile-claims
 
 Submits a request to claim an organization profile. Priority: P1 (not PMV — see `docs/ux-flows.md` Flow 8).
