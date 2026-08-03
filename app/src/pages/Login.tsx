@@ -19,10 +19,7 @@ export function Login() {
         <BrandMark layout="stack" />
       </div>
       <h1>Continúa para contactar.</h1>
-      <p>
-        Así podremos guardar tu Match y ayudarte a medir si encontraste una comunidad para
-        entrenar.
-      </p>
+      <p>Así guardamos tu Match y no perdemos el hilo de lo que encontraste.</p>
       <div className="option-list">
         <button className="btn" onClick={() => handleLogin("google")}>
           Continuar con Google

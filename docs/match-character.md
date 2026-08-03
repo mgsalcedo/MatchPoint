@@ -16,29 +16,35 @@ Match™ appears in: welcome screen, Sport Match™ flow, loading state, results
 
 ## Personality
 
-Should sound: clear, practical, brief, warm, motivating, energetic, human, supportive.
+**Recalibrated 2026-08 ("Nivel 2 — Jovial y directo", product decision after reviewing 3 calibrated intensity options against real app copy)**: Match™ keeps every trait it already had — clear, practical, brief, warm, motivating, supportive — and turns up energy and personality on top of that base, not instead of it. Think: the friend who's genuinely good at this and enjoys helping, not a hype-man and not a customer-service script.
 
-Should not sound: robotic, overly enthusiastic, childish, pushy, salesy, technical, judgmental.
+Should sound: clear, practical, brief, warm, motivating, **jovial, witty, like a cómplice (a friend who's in on it with you)**, human, supportive, confidently informal (natural Peruvian everyday Spanish, not slang-for-slang's-sake).
+
+Should not sound: robotic, overly enthusiastic (exclamation-point spam, forced hype), childish, pushy, salesy, technical, judgmental, **sarcastic at the user's expense, mocking of a user's level or choices, try-hard**.
+
+**The line that matters most**: jovial is a *tone*, never a *target*. Match™ can be playful about the situation (searching, waiting, an app hiccup) — it is never playful *at the user*. A beginner picking "Nunca practiqué" gets the same warmth as an advanced athlete; a network error gets a light touch, not the user's mistake being the joke. This is the same boundary Rules #1/#2 below already drew — recalibrating tone doesn't touch it.
 
 ## Voice examples
 
-**Good**: "Perfecto. Ahora veamos dónde te gustaría entrenar." · "Ya casi termino. Estoy buscando opciones que realmente encajen contigo." · "Te recomiendo esta comunidad porque coincide con tu objetivo, horario y nivel." · "No hay problema. Probemos con opciones cercanas."
+**Good** (post-recalibration): "¡Qué tal! Soy Match™, tu cómplice para encontrar dónde entrenar." · "Ya casi termino — estoy cruzando tus datos para encontrar tu combo ideal." · "Te recomiendo esta comunidad porque coincide con tu objetivo, horario y nivel — no es magia, es matemática con buen gusto." · "No hay drama. Probemos con opciones cercanas."
 
-**Bad**: "Processing user input." · "Your query has returned 5 providers." · "You must register to continue." · "This is the optimal algorithmic result."
+**Still bad** (unchanged — jovial doesn't mean any of this becomes okay): "Processing user input." · "Your query has returned 5 providers." · "You must register to continue." · "This is the optimal algorithmic result." · ~~"Jaja, ¿en serio nunca has practicado nada?"~~ (mocks the user) · ~~"¡¡¡Encontré tu match perfecto!!!"~~ (overly enthusiastic, also violates Rule #5 — never claims a perfect result) · ~~"Otra vez sin internet, típico."~~ (blames/mocks the user for an error)
 
 ## Match™ across the flow
 
-- **First screen** — "Hola, soy Match™. Te ayudo a encontrar una comunidad deportiva que encaje contigo. Tomará menos de un minuto." CTA: "Comenzar Sport Match™"
-- **Goal question** — "Primero dime qué quieres lograr."
-- **Sport question** — "Perfecto. Ahora elijamos el deporte que más se acerca a eso."
-- **District question** — "Busquemos algo que te quede bien."
-- **Days question** — "El horario también importa. ¿Qué días puedes entrenar?"
-- **Level question** — "No hay respuesta incorrecta. Esto nos ayuda a cuidar mejor tu Match."
-- **Environment question** — "El ambiente importa tanto como el entrenamiento."
-- **Loading** — "Estoy buscando comunidades que realmente encajen contigo..." (alternatives: "Cruzando tu objetivo, horario y ubicación...", "Ya casi tengo tus mejores opciones...")
-- **Results** — "Encontré comunidades que podrían ser un gran match para ti." / "Te recomiendo estas opciones porque coinciden con lo que estás buscando."
-- **Before contact** — "Para contactar con esta comunidad, continúa con Google o Apple. Así podremos guardar tu Match."
-- **Follow-up** — "Hola, soy Match™. ¿Pudiste encontrar una comunidad para entrenar?" If yes: "¡Qué buena noticia! Me alegra que hayas dado el primer paso." If no: "No hay problema. Probemos con nuevas opciones."
+Rewritten for the Nivel 2 recalibration — see `docs/microcopy.md` for the authoritative, complete copy (this section stays illustrative, not exhaustive, per this doc's own original scope).
+
+- **First screen** — "Hola, soy Match™, tu cómplice deportivo. Te ayudo a encontrar una comunidad que encaje contigo — toma menos de un minuto, lo prometo." CTA: "Comenzar Sport Match™"
+- **Goal question** — "Arranquemos por lo importante: ¿qué quieres lograr?"
+- **Sport question** — "Ahora sí, hablemos de deporte. ¿Cuál tienes en mente?"
+- **District question** — "Ubiquémonos. ¿Por dónde te queda bien entrenar?"
+- **Days question** — "El horario también cuenta. ¿Qué días te sirven?"
+- **Level question** — "Acá no hay respuesta incorrecta — esto es para cuidarte, no para juzgarte."
+- **Environment question** — "El ambiente pesa tanto como el entrenamiento mismo. ¿Qué buscas?"
+- **Loading** — "Estoy cruzando tu objetivo, horario y ubicación para armarte un buen combo..." (alternatives: "Ya casi tengo tus mejores opciones...", "Buscando dónde vas a querer volver...")
+- **Results** — "Encontré comunidades que tienen pinta de gran match para ti." / "Estas opciones coinciden con lo que estás buscando — y no es casualidad."
+- **Before contact** — "Para contactarlos, continúa con Google. Así guardamos tu Match y no perdemos el hilo."
+- **Follow-up** — "Hola, soy Match™. ¿Encontraste tu lugar para entrenar?" If yes: "¡Qué bueno! Me alegra haber sido parte de eso." If no: "No hay drama. Sigamos buscando tu combo."
 
 ## Visual representation
 

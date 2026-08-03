@@ -26,7 +26,7 @@ export function ContactSuccess() {
       <div className="rise-in" style={{ marginBottom: 24 }}>
         <BrandMark layout="stack" />
       </div>
-      <h1>Listo, tu contacto quedó guardado.</h1>
+      <h1>Listo, ya quedó guardado tu contacto.</h1>
       <p>
         {organizationName
           ? `Guardamos tu interés en ${organizationName}. Ahora puedes escribirles directamente.`
