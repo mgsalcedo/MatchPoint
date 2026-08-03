@@ -11,9 +11,13 @@
 import type { ContactType, Sport } from "../types";
 
 export type AnalyticsEvent =
+  | { name: "app_opened" }
+  | { name: "match_started" }
   | { name: "sport_match_completed"; matchSessionId: string; sport: Sport; district: string }
   | { name: "results_viewed"; matchSessionId: string; resultCount: number }
   | { name: "no_match_viewed"; matchSessionId: string }
+  | { name: "profile_opened"; organizationId: string; resultRank: number | null }
+  | { name: "contact_clicked"; organizationId: string; contactType: ContactType; resultRank: number | null }
   | { name: "login_started"; provider: "google" | "apple" }
   | { name: "login_completed"; provider: "google" | "apple" }
   | { name: "lead_created"; leadId: string; organizationId: string; contactType: ContactType }

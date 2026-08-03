@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { MatchGuide } from "../components/MatchGuide";
 import { ProgressBar } from "../components/ProgressBar";
 import { DISTRICTS } from "../data/organizations";
 import { useMatchSession } from "../context/MatchSessionContext";
+import { track } from "../lib/analytics";
 import {
   BUDGET_LABELS,
   DAY_LABELS,
@@ -111,6 +112,13 @@ export function SportMatch() {
   const [step, setStep] = useState(() => (startAt === "sport" ? SPORT_QUESTION_INDEX : 0));
   const [draftDays, setDraftDays] = useState<Weekday[]>([]);
   const [matching, setMatching] = useState(false);
+
+  // Mount, not the Welcome screen's button click — a visitor can land on /match directly
+  // (browser back/forward, refresh) without going through that click handler; the mount is the
+  // more reliable "started" signal (research.md R9, 005-analytics-funnel).
+  useEffect(() => {
+    track({ name: "match_started" });
+  }, []);
 
   const question = QUESTIONS[step];
 

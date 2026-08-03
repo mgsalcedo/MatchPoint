@@ -106,6 +106,20 @@ create type claim_status as enum (
   'rejected',
   'needs_more_info'
 );
+
+create type analytics_event_name as enum (
+  'app_opened',
+  'match_started',
+  'sport_match_completed',
+  'results_viewed',
+  'no_match_viewed',
+  'profile_opened',
+  'contact_clicked',
+  'login_started',
+  'login_completed',
+  'lead_created',
+  'external_contact_opened'
+);
 ```
 
 ## Tables
@@ -365,6 +379,37 @@ create table profile_claims (
 );
 ```
 
+### analytics_events
+
+`analytics_events` (`005-analytics-funnel`, migration `0012`) is durable storage for BR-027's funnel events — `app/src/lib/analytics.ts`'s `track()` writes here via `installSupabaseAnalyticsSink()`. Deliberately **no foreign keys** on `user_id`/`organization_id`/`match_session_id`/`lead_id`: this table is best-effort telemetry, not a referentially-integral record — an FK violation must never turn a should-never-fail write into a failing one (e.g. a race between `onAuthStateChange`'s fire-and-forget `ensureUserRow()` and an analytics write carrying the same not-yet-committed `user_id`), and plain columns avoid needing `ON DELETE` handling once a User-deletion path exists. No `jsonb` payload column either — narrow, explicitly-typed nullable columns per field, matching the PII/location allow-list already applied to every other logged/analytics payload in this project. `sport`/`district` go further still: unlike `match_sessions`/`leads`, they're not even `sport_id`/`district_id` lookups — plain denormalized text, to avoid an extra network round trip on a write path that must never block (research.md R5/R6).
+
+**Future obligation, not yet actionable**: because `user_id` has no FK here, deleting a `users` row will **not** cascade into or null out matching `analytics_events` rows the way it does for `leads`/`match_sessions` — those rows would silently retain a now-orphaned `user_id`. Whoever eventually builds the account-deletion path (`docs/security-standards.md`'s pre-launch gap, first flagged in `004-auth-lead-creation`'s security audit) must explicitly include `analytics_events` in that purge; it will not be caught by an FK-cascade-only approach. Not actioned here — no deletion path exists yet to integrate with.
+
+```sql
+create table analytics_events (
+  id uuid primary key default gen_random_uuid(),
+  visit_id uuid not null,
+  user_id uuid,
+  event_name analytics_event_name not null,
+
+  sport text,
+  district text,
+  match_session_id uuid,
+  result_count integer,
+  organization_id uuid,
+  contact_type contact_type,
+  result_rank integer,
+  lead_id uuid,
+  login_provider text,
+
+  created_at timestamptz not null default now()
+);
+
+create index idx_analytics_events_visit on analytics_events(visit_id);
+create index idx_analytics_events_name_created on analytics_events(event_name, created_at);
+create index idx_analytics_events_user on analytics_events(user_id) where user_id is not null;
+```
+
 ## RLS notes
 
 - Public can read active organizations, sports, districts, venues, schedules, ADN.
@@ -375,6 +420,7 @@ create table profile_claims (
 - Anonymous (`anon` role) clients may INSERT their own `match_sessions`/`match_results` rows (`user_id` must be null); there is no SELECT policy for either table — the client never reads a row back after writing it (migration `0009`, feature `002-sport-match-engine`).
 - `users`: authenticated users may insert/update/select only their own row (`id = auth.uid()`); no anon access. `id` is always the Supabase Auth user's own id, never the column's `gen_random_uuid()` default (migration `0010`, feature `004-auth-lead-creation`).
 - Authenticated (`authenticated` role) clients may also INSERT their own `match_sessions`/`match_results` rows (`user_id = auth.uid()` for sessions), mirroring the anon policies above — needed once login persists across reloads, so a returning logged-in user's Sport Match™ session still writes correctly (migration `0011`, feature `004-auth-lead-creation`).
+- `analytics_events`: both `anon` and `authenticated` clients may INSERT (a visitor can go from anonymous to logged-in mid-funnel); `anon` writes must have `user_id is null`, `authenticated` writes must have `user_id is null or user_id = auth.uid()` (never spoofable). No SELECT policy for any client role — the product owner queries this table directly via the Supabase SQL Editor, per `docs/analytics-queries.md` (migration `0012`, feature `005-analytics-funnel`).
 
 ## Migration order
 
@@ -394,3 +440,4 @@ create table profile_claims (
 14. Profile claims.
 15. RLS policies.
 16. Seed data.
+17. Analytics events (migration `0012`, feature `005-analytics-funnel`).

@@ -245,6 +245,12 @@ Rules: every contact action (WhatsApp, Instagram, booking, call, form) must crea
 
 An organization's request to claim a preloaded profile. Statuses: `pending, approved, rejected, needs_more_info`. See `docs/ux-flows.md` Flow 8 (V1.1, not PMV) for the surrounding UX.
 
+## AnalyticsEvent
+
+Represents a single occurrence of one of BR-027's funnel steps (`005-analytics-funnel`; the feature's spec calls this "Funnel Event" — same entity). Carries: which step (`event_name`), when, a visit-correlation identifier (`visit_id`, client-generated per browser-tab visit — not `MatchSession.anonymous_id`, which stays unused), and a narrow set of typed, nullable contextual fields relevant to that step only (sport, district, organization, contact type, result count/rank, lead id, login provider) — never raw free text or precise location, per `docs/security-standards.md`.
+
+Written on every tracked funnel action, from an anonymous OR logged-in client; never blocks or fails visibly to the user if the write fails. Deliberately has **no enforced foreign keys** to `User`/`Organization`/`MatchSession`/`Lead` (see `docs/database-schema.md`'s divergence note on this table) — it is best-effort telemetry, not a referentially-integral record, and is excluded from this doc's core entity map for that reason (not because it's deferred, unlike `Event`/`Coach`).
+
 ## Minimum launch dataset
 
 An organization should appear in Sport Match™ only if it has: name, sport, district or venue, contact method, basic schedule or availability note, level, environment tag, short description.
