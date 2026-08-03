@@ -3,7 +3,10 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
+// GitHub Pages serves project sites from https://<user>.github.io/<repo>/,
+// so asset URLs need the repo name as a base path (unused by Vercel/local dev).
 export default defineConfig({
+  base: process.env.GITHUB_PAGES === 'true' ? '/MatchPoint/' : '/',
   plugins: [react()],
   test: {
     environment: 'node',

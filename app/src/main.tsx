@@ -7,9 +7,12 @@ import { installSupabaseAnalyticsSink } from "./lib/data/analyticsEvents";
 
 installSupabaseAnalyticsSink();
 
+// Matches vite.config.ts's GitHub Pages base path — both are no-ops locally/on Vercel.
+const basename = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <App />
     </BrowserRouter>
   </StrictMode>
