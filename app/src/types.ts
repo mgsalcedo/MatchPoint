@@ -79,6 +79,11 @@ export interface Organization {
   services: string[];
   coach?: string;
   profileStatus: "preloaded" | "claimed" | "verified" | "incomplete" | "suspended";
+  // Optional by design, not omission: most seeded organizations have no imagery yet, and the
+  // initials-over-sport-gradient fallback is a first-class rendering path, not an error state
+  // (007-visual-identity-system, data-model.md).
+  logoUrl?: string;
+  coverImageUrl?: string;
 }
 
 export interface SportMatchAnswers {

@@ -14,9 +14,11 @@ However, MatchPoint is not an events product — it's a sports community discove
 
 ## Design positioning
 
-**Not this**: generic gym app, aggressive dark fitness app, neon-heavy performance dashboard, social feed, complex marketplace, sterile corporate SaaS.
+**Not this**: generic gym app, aggressive dark fitness app, harsh/saturated neon (casino or crypto-app register), social feed, complex marketplace, sterile corporate SaaS.
 
-**Yes this**: premium sports discovery, curated community pages, clean onboarding, beautiful cards, human guidance, calm energy, editorial but sporty, mobile-first, trustworthy and warm.
+**Yes this**: premium sports discovery, curated community pages, clean onboarding, beautiful cards, human guidance, confident energy (amplified 2026-08 from "calm" — see below), editorial but sporty, mobile-first, trustworthy and warm.
+
+**Light background, amplified glow — a deliberate fork, not an oversight** (2026-08 product decision): the "futuristic, glowing" register most products reach for (Stripe, Linear, Web3/fintech) pairs a dark background with neon-bright accents, because glow reads strongest by contrast against dark. MatchPoint stays on a light, warm background and turns up the gradient's presence instead (bigger aurora washes, real glow on hover/focus/emphasis — see `docs/design-system.md`'s Interaction & Motion) — trading some of that dark-mode glow intensity for keeping the "trustworthy and warm" read that distinguishes MatchPoint from a generic dark fintech/Web3 template. If the product direction later wants the full dark-glow register, that's a bigger identity change requiring its own decision, not an incremental CSS pass.
 
 ## Design keywords
 
@@ -56,7 +58,7 @@ flowchart LR
 
 **Cards**: central to the experience — should feel like curated recommendations, not database rows. Include a strong title, image or visual marker, match label, 2-3 reasons, clear CTA, tags. The top result and hero moments use the Iridescent Glass treatment (`docs/design-system.md`); the rest of the list stays flat for legibility.
 
-**Motion**: subtle. Recommended uses: Sport Match™ progress, match calculation transition, button feedback, card entrance, contact confirmation. Avoid distracting animations, excessive loading, gamification-heavy motion.
+**Motion**: confident at interaction points (hover, focus, selection, primary CTA), still restrained on ambient/background motion (amplified 2026-08 — see `docs/design-system.md`'s Interaction & Motion for the concrete spec: timing tokens, glow states, entrance animation). Recommended uses: Sport Match™ progress, match calculation transition, button/card hover feedback (glow + lift), selection feedback, card entrance, contact confirmation, aurora wash drift (hero + top result). Avoid distracting animations, excessive loading, gamification-heavy motion, and any *looping* motion outside the aurora wash — interaction feedback should feel alive and immediate, not decorative or attention-grabbing on its own.
 
 ## Tone of interface
 

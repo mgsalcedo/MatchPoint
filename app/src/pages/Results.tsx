@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MatchGuide } from "../components/MatchGuide";
+import { OrgAvatar } from "../components/OrgAvatar";
 import { useMatchSession } from "../context/MatchSessionContext";
 import { accentColor } from "../lib/colors";
 import { badgeClass, SPORT_LABELS } from "../lib/labels";
@@ -45,6 +46,48 @@ export function Results() {
     );
   }
 
+  // 007-visual-identity-system R8: presentational split only — calculateMatches() already returns
+  // results sorted by score, so results[0] is already the top match. No change to ordering,
+  // scoring, or the 5-result cap.
+  const [topResult, ...alternatives] = results;
+
+  function renderCard(result: (typeof results)[number], rank: number, isTop: boolean) {
+    const sport = result.organization.sports[0];
+    return (
+      <div className={isTop ? "card card-top rise-in" : "card rise-in"} key={result.organization.id}>
+        <div className="card-head">
+          <OrgAvatar
+            name={result.organization.name}
+            logoUrl={result.organization.logoUrl}
+            sport={sport}
+            size={isTop ? "lg" : "md"}
+          />
+          <div className="card-head-body">
+            <div className="card-title-row">
+              <h2>{result.organization.name}</h2>
+              <span className={badgeClass(result.label)}>{result.label}</span>
+            </div>
+            <div className="meta-row" style={{ marginBottom: 0 }}>
+              {SPORT_LABELS[sport]} · {result.organization.districts[0]}
+            </div>
+          </div>
+        </div>
+        <ul className="reasons">
+          {result.reasons.slice(0, 3).map((reason) => (
+            <li key={reason}>{reason}</li>
+          ))}
+        </ul>
+        <button
+          className={isTop ? "btn btn-primary" : "btn"}
+          onClick={() => navigate(`/organizations/${result.organization.id}`, { state: { resultRank: rank } })}
+          style={isTop ? undefined : { borderColor: accentColor(sport) }}
+        >
+          Ver comunidad
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="screen screen-tight">
       <MatchGuide text="Match™" />
@@ -54,29 +97,16 @@ export function Results() {
         parecen a lo que buscas.
       </p>
 
-      {results.map((result, index) => (
-        <div className="card" key={result.organization.id}>
-          <div className="card-title-row">
-            <h2>{result.organization.name}</h2>
-            <span className={badgeClass(result.label)}>{result.label}</span>
-          </div>
-          <div className="meta-row">
-            {SPORT_LABELS[result.organization.sports[0]]} · {result.organization.districts[0]}
-          </div>
-          <ul className="reasons">
-            {result.reasons.slice(0, 3).map((reason) => (
-              <li key={reason}>{reason}</li>
-            ))}
-          </ul>
-          <button
-            className="btn"
-            onClick={() => navigate(`/organizations/${result.organization.id}`, { state: { resultRank: index + 1 } })}
-            style={{ borderColor: accentColor(result.organization.sports[0]) }}
-          >
-            Ver comunidad
-          </button>
-        </div>
-      ))}
+      {renderCard(topResult, 1, true)}
+
+      {/* Heading only when alternatives exist — a single-result run must not render an empty
+          section (007 R8 guard). */}
+      {alternatives.length > 0 && (
+        <>
+          <div className="list-heading">También podrían encajar</div>
+          {alternatives.map((result, index) => renderCard(result, index + 2, false))}
+        </>
+      )}
 
       {/* 006-no-empty-results FR-008: always visible, regardless of match quality — a user with
           only "Weak Match" results should be able to change any answer, not just the sport. */}

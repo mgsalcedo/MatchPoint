@@ -21,6 +21,7 @@ export interface GetOrganizationsParams {
 const SELECT = `
   id, name, slug, organization_type, description, short_description,
   instagram_url, whatsapp_number, booking_url, website_url, profile_status,
+  logo_url, cover_image_url,
   organization_sports:organization_sports(sport:sports(id, name, slug)),
   venues:venues(id, name, district:districts(id, name)),
   schedules:schedules(id, day_of_week, start_time, end_time, session_name, level_min, level_max, venue_id, sport_id),

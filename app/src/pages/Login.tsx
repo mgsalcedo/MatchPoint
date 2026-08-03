@@ -1,3 +1,4 @@
+import { BrandMark } from "../components/BrandMark";
 import { useMatchSession } from "../context/MatchSessionContext";
 
 export function Login() {
@@ -12,7 +13,11 @@ export function Login() {
 
   return (
     <div className="screen text-center">
+      <div className="aurora" aria-hidden="true" />
       <div className="spacer" />
+      <div className="rise-in" style={{ marginBottom: 24 }}>
+        <BrandMark layout="stack" />
+      </div>
       <h1>Continúa para contactar.</h1>
       <p>
         Así podremos guardar tu Match y ayudarte a medir si encontraste una comunidad para

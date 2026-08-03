@@ -151,8 +151,13 @@ export function SportMatch() {
   if (matching) {
     return (
       <div className="screen text-center">
+        <div className="aurora" aria-hidden="true" />
         <div className="spacer" />
-        <div className="match-guide-avatar" style={{ margin: "0 auto 16px" }} aria-hidden="true">
+        <div
+          className="match-guide-avatar match-guide-avatar-pulse"
+          style={{ margin: "0 auto 16px" }}
+          aria-hidden="true"
+        >
           M
         </div>
         <h2>Estoy buscando comunidades que realmente encajen contigo...</h2>
@@ -168,49 +173,55 @@ export function SportMatch() {
           ‹ Atrás
         </button>
       )}
+      {/* Progress sits outside the animated block so the bar fills smoothly across questions
+          instead of restarting. `key={step}` re-runs the entrance on every question change —
+          the screen itself only remounts on route change, not between steps. */}
       <ProgressBar step={step + 1} total={QUESTIONS.length} />
-      <MatchGuide text={GUIDE_MICROCOPY[step]} />
-      <h2>{question.title}</h2>
 
-      {question.type === "single" && (
-        <div className="option-list">
-          {question.options.map((opt) => (
-            <button key={opt.value} className="option" onClick={() => goToNext(opt.value)}>
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      )}
+      <div key={step} className="question-block rise-in">
+        <MatchGuide text={GUIDE_MICROCOPY[step]} />
+        <h2>{question.title}</h2>
 
-      {question.type === "multi" && (
-        <>
+        {question.type === "single" && (
           <div className="option-list">
-            {question.options.map((opt) => {
-              const selected = draftDays.includes(opt.value as Weekday);
-              return (
-                <button
-                  key={opt.value}
-                  className={`option${selected ? " selected" : ""}`}
-                  onClick={() =>
-                    setDraftDays((days) =>
-                      selected ? days.filter((d) => d !== opt.value) : [...days, opt.value as Weekday]
-                    )
-                  }
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
+            {question.options.map((opt) => (
+              <button key={opt.value} className="option" onClick={() => goToNext(opt.value)}>
+                {opt.label}
+              </button>
+            ))}
           </div>
-          <button
-            className="btn btn-primary btn-block"
-            disabled={draftDays.length === 0}
-            onClick={() => goToNext(draftDays)}
-          >
-            Continuar
-          </button>
-        </>
-      )}
+        )}
+
+        {question.type === "multi" && (
+          <>
+            <div className="option-list">
+              {question.options.map((opt) => {
+                const selected = draftDays.includes(opt.value as Weekday);
+                return (
+                  <button
+                    key={opt.value}
+                    className={`option${selected ? " selected" : ""}`}
+                    onClick={() =>
+                      setDraftDays((days) =>
+                        selected ? days.filter((d) => d !== opt.value) : [...days, opt.value as Weekday]
+                      )
+                    }
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              className="btn btn-primary btn-block"
+              disabled={draftDays.length === 0}
+              onClick={() => goToNext(draftDays)}
+            >
+              Continuar
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 }

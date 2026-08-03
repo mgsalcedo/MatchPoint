@@ -21,9 +21,6 @@ function App() {
   return (
     <MatchSessionProvider>
       <div className="app-shell">
-        <div className="wip-banner">
-          Carcasa PMV — sin data model, diseño final ni microcopy final. Solo flujo navegable.
-        </div>
         <Routes>
           <Route path="/" element={<Welcome />} />
           <Route path="/match" element={<SportMatch />} />
