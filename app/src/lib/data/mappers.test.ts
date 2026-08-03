@@ -24,6 +24,8 @@ function fixtureRow(overrides: Partial<DbOrganizationRow> = {}): DbOrganizationR
     booking_url: null,
     website_url: null,
     profile_status: "verified",
+    logo_url: null,
+    cover_image_url: null,
     organization_sports: [{ sport: { id: "s1", name: "Running", slug: "running" } }],
     venues: [
       {
@@ -112,10 +114,12 @@ describe("mapOrganizationRow — shape parity (SC-006)", () => {
         "adnDeportivo",
         "bookingLink",
         "coach",
+        "coverImageUrl", // added by 007-visual-identity-system
         "description",
         "districts",
         "id",
         "instagram",
+        "logoUrl", // added by 007-visual-identity-system
         "name",
         "priceRange",
         "profileStatus",

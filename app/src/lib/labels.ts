@@ -52,7 +52,15 @@ export const BUDGET_LABELS: Record<string, string> = {
 };
 
 // docs/component-library.md's CommunityADN spec: readable labels, in this display order.
-export const ADN_LABELS: { key: keyof import("../types").AdnDeportivo; label: string }[] = [
+/**
+ * Only the 1-5 score dimensions — deliberately excludes `environments`, which is a string array
+ * rendered as chips elsewhere, not a bar. Previously typed as the full `keyof AdnDeportivo`,
+ * which made every consumer's value `number | Environment[]` and forced unsound casts at the
+ * call site (surfaced by 007-visual-identity-system once the typecheck command was fixed).
+ */
+export type AdnScoreKey = Exclude<keyof import("../types").AdnDeportivo, "environments">;
+
+export const ADN_LABELS: { key: AdnScoreKey; label: string }[] = [
   { key: "beginnerFriendliness", label: "Ideal para principiantes" },
   { key: "socialAtmosphere", label: "Ambiente social" },
   { key: "competitiveness", label: "Competitividad" },

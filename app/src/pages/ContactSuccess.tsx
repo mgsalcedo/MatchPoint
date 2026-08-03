@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { BrandMark } from "../components/BrandMark";
 import { useMatchSession } from "../context/MatchSessionContext";
 import { track } from "../lib/analytics";
 
@@ -20,7 +21,11 @@ export function ContactSuccess() {
 
   return (
     <div className="screen text-center">
+      <div className="aurora" aria-hidden="true" />
       <div className="spacer" />
+      <div className="rise-in" style={{ marginBottom: 24 }}>
+        <BrandMark layout="stack" />
+      </div>
       <h1>Listo, tu contacto quedó guardado.</h1>
       <p>
         {organizationName

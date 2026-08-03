@@ -125,6 +125,8 @@ export interface DbOrganizationRow {
   booking_url: string | null;
   website_url: string | null;
   profile_status: DbProfileStatus;
+  logo_url: string | null;
+  cover_image_url: string | null;
   organization_sports: { sport: DbSportRow | null }[];
   venues: DbVenueRow[];
   schedules: DbScheduleRow[];

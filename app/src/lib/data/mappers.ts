@@ -224,5 +224,9 @@ export function mapOrganizationRow(row: DbOrganizationRow): Organization {
     services: [],
     coach: undefined,
     profileStatus: mapProfileStatus(row.profile_status),
+    // Surfaced by 007-visual-identity-system — the columns existed in the schema and were
+    // already documented, only the app layer never read them (data-model.md).
+    logoUrl: row.logo_url ?? undefined,
+    coverImageUrl: row.cover_image_url ?? undefined,
   };
 }

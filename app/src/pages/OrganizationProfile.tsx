@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { OrgAvatar } from "../components/OrgAvatar";
 import { useMatchSession } from "../context/MatchSessionContext";
-import { accentColor } from "../lib/colors";
+import { accentGradient } from "../lib/colors";
 import { track } from "../lib/analytics";
 import {
   ADN_LABELS,
@@ -72,7 +73,10 @@ export function OrganizationProfile() {
     // Recorded independent of and prior to knowing the outcome (login redirect, immediate
     // success, org-unavailable, or lead-save failure all follow this line) — FR-002,
     // research.md R9, 005-analytics-funnel.
-    track({ name: "contact_clicked", organizationId: organization.id, contactType: primaryContact.type, resultRank });
+    // `organization!` matches the assertion on the requestContact call below: the early return
+    // above guarantees it's defined, but TS drops that narrowing inside a hoisted function
+    // declaration.
+    track({ name: "contact_clicked", organizationId: organization!.id, contactType: primaryContact.type, resultRank });
     setContactState("sending");
     const outcome = await requestContact(
       organization!,
@@ -103,17 +107,33 @@ export function OrganizationProfile() {
         ‹ Volver
       </button>
 
-      <div className="hero-block" style={{ background: accentColor(organization.sports[0]) }}>
-        {organization.name
-          .split(" ")
-          .map((w) => w[0])
-          .slice(0, 2)
-          .join("")}
-      </div>
+      {/* Real cover photo when the community has one; otherwise the same deliberate
+          initials-over-sport-gradient fallback used on result cards (007 R4, BR-016). */}
+      {organization.coverImageUrl ? (
+        <img className="hero-block" src={organization.coverImageUrl} alt="" aria-hidden="true" />
+      ) : (
+        <div className="hero-block" style={{ background: accentGradient(organization.sports[0]) }}>
+          {organization.name
+            .split(" ")
+            .map((w) => w[0])
+            .slice(0, 2)
+            .join("")}
+        </div>
+      )}
 
-      <div className="card-title-row">
-        <h1>{organization.name}</h1>
-        {matchResult && <span className={badgeClass(matchResult.label)}>{matchResult.label}</span>}
+      <div className="card-head">
+        <OrgAvatar
+          name={organization.name}
+          logoUrl={organization.logoUrl}
+          sport={organization.sports[0]}
+          size="lg"
+        />
+        <div className="card-head-body">
+          <div className="card-title-row">
+            <h1>{organization.name}</h1>
+            {matchResult && <span className={badgeClass(matchResult.label)}>{matchResult.label}</span>}
+          </div>
+        </div>
       </div>
       <div className="meta-row">
         {organization.sports.map((s) => SPORT_LABELS[s]).join(", ")} · {organization.districts.join(", ")}
@@ -173,7 +193,7 @@ export function OrganizationProfile() {
             <div className="progress-track adn-bar-track">
               <div
                 className="progress-fill"
-                style={{ width: `${Math.round((organization.adnDeportivo[key] as number) * 100)}%` }}
+                style={{ width: `${Math.round(organization.adnDeportivo[key] * 100)}%` }}
               />
             </div>
           </div>
