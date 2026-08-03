@@ -8,12 +8,16 @@
  * features add new AnalyticsEvent members and reuse track()/setTracker(), not a new mechanism.
  */
 
-import type { Sport } from "../types";
+import type { ContactType, Sport } from "../types";
 
 export type AnalyticsEvent =
   | { name: "sport_match_completed"; matchSessionId: string; sport: Sport; district: string }
   | { name: "results_viewed"; matchSessionId: string; resultCount: number }
-  | { name: "no_match_viewed"; matchSessionId: string };
+  | { name: "no_match_viewed"; matchSessionId: string }
+  | { name: "login_started"; provider: "google" | "apple" }
+  | { name: "login_completed"; provider: "google" | "apple" }
+  | { name: "lead_created"; leadId: string; organizationId: string; contactType: ContactType }
+  | { name: "external_contact_opened"; leadId: string; contactType: ContactType };
 
 type Tracker = (event: AnalyticsEvent) => void;
 

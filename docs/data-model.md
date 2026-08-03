@@ -53,7 +53,7 @@ Represents a person looking for where to train.
 | created_at | timestamp | yes | System |
 | updated_at | timestamp | yes | System |
 
-Rules: User is created only after Google or Apple login (Product Principle 1 — no persisted account before that). Sport Match™ can be completed anonymously; anonymous match sessions can be linked to the user after login.
+Rules: User is created only after Google or Apple login (Product Principle 1 — no persisted account before that). Sport Match™ can be completed anonymously; anonymous match sessions can be linked to the user after login. `id` is always the Supabase Auth user's own id (`auth.uid()`), never independently generated — already-shipped `leads` RLS (`authenticated_insert_leads`, `001-data-foundation`) depends on this equality (`004-auth-lead-creation`).
 
 ## Sport
 

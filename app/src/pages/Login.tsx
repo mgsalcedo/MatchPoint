@@ -1,18 +1,13 @@
-import { useNavigate } from "react-router-dom";
 import { useMatchSession } from "../context/MatchSessionContext";
 
 export function Login() {
-  const navigate = useNavigate();
-  const { login, confirmPendingContact, pendingContact } = useMatchSession();
+  const { login } = useMatchSession();
 
+  // Real OAuth is a full-page navigation away from the SPA (research.md R10, 004-auth-lead-
+  // creation) — nothing runs after login() is called; the pending contact (already saved to
+  // sessionStorage by requestContact) completes on /auth/callback when the user returns.
   function handleLogin(provider: "google" | "apple") {
     login(provider);
-    if (pendingContact) {
-      confirmPendingContact();
-      navigate("/contact/success");
-    } else {
-      navigate("/match/results");
-    }
   }
 
   return (
@@ -27,9 +22,9 @@ export function Login() {
         <button className="btn" onClick={() => handleLogin("google")}>
           Continuar con Google
         </button>
-        <button className="btn" onClick={() => handleLogin("apple")}>
-          Continuar con Apple
-        </button>
+        {/* Apple Sign In deferred this milestone — research.md R1. Structurally ready
+            (login() already takes provider: "google" | "apple"); re-enable once the owner
+            completes Apple Developer setup. */}
       </div>
       <div className="spacer" />
     </div>

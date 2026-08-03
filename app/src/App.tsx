@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { MatchSessionProvider } from "./context/MatchSessionContext";
+import { AuthCallback } from "./pages/AuthCallback";
 import { ContactSuccess } from "./pages/ContactSuccess";
 import { Login } from "./pages/Login";
 import { OrganizationProfile } from "./pages/OrganizationProfile";
@@ -20,6 +21,7 @@ function App() {
           <Route path="/match/results" element={<Results />} />
           <Route path="/organizations/:id" element={<OrganizationProfile />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/contact/success" element={<ContactSuccess />} />
         </Routes>
       </div>

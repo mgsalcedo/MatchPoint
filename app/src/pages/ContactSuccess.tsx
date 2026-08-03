@@ -1,38 +1,41 @@
 import { useNavigate } from "react-router-dom";
 import { useMatchSession } from "../context/MatchSessionContext";
-
-function externalLink(contactType: string, organization: { whatsapp?: string; instagram?: string; bookingLink?: string }) {
-  if (contactType === "whatsapp" && organization.whatsapp) {
-    return { url: `https://wa.me/${organization.whatsapp}`, label: "Abrir WhatsApp" };
-  }
-  if (contactType === "instagram" && organization.instagram) {
-    return { url: `https://instagram.com/${organization.instagram}`, label: "Abrir Instagram" };
-  }
-  if (organization.bookingLink) {
-    return { url: organization.bookingLink, label: "Reservar clase" };
-  }
-  return null;
-}
+import { track } from "../lib/analytics";
 
 export function ContactSuccess() {
   const navigate = useNavigate();
-  const { lastLead, getOrganization, resetMatch } = useMatchSession();
+  const { lastLead, lastContactedOrganization, lastExternalLink, getOrganization, resetMatch } = useMatchSession();
 
-  const organization = lastLead ? getOrganization(lastLead.organizationId) : undefined;
-  const link = organization && lastLead ? externalLink(lastLead.contactType, organization) : null;
+  // Prefers lastContactedOrganization (set directly from the fresh contactability snapshot
+  // performContact already fetched) over the in-memory getOrganization() lookup: state.results
+  // is empty after a real OAuth full-page redirect, so the old lookup-only path would silently
+  // show "no organization" for every first-time-login contact (research.md R11).
+  const organizationName =
+    lastContactedOrganization?.name ??
+    (lastLead ? getOrganization(lastLead.organizationId)?.name : undefined);
+
+  function handleOpenExternal() {
+    if (lastLead) track({ name: "external_contact_opened", leadId: lastLead.id, contactType: lastLead.contactType });
+  }
 
   return (
     <div className="screen text-center">
       <div className="spacer" />
       <h1>Listo, tu contacto quedó guardado.</h1>
       <p>
-        {organization
-          ? `Guardamos tu interés en ${organization.name}. Ahora puedes escribirles directamente.`
+        {organizationName
+          ? `Guardamos tu interés en ${organizationName}. Ahora puedes escribirles directamente.`
           : "Guardamos tu interés en esta comunidad."}
       </p>
-      {link && (
-        <a className="btn btn-primary" href={link.url} target="_blank" rel="noreferrer">
-          {link.label}
+      {lastExternalLink && (
+        <a
+          className="btn btn-primary"
+          href={lastExternalLink.url}
+          target="_blank"
+          rel="noreferrer"
+          onClick={handleOpenExternal}
+        >
+          {lastExternalLink.label}
         </a>
       )}
       <div className="spacer" />

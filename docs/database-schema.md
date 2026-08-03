@@ -373,6 +373,8 @@ create table profile_claims (
 - Admin can manage all data.
 - Organization editing comes after profile claim approval.
 - Anonymous (`anon` role) clients may INSERT their own `match_sessions`/`match_results` rows (`user_id` must be null); there is no SELECT policy for either table — the client never reads a row back after writing it (migration `0009`, feature `002-sport-match-engine`).
+- `users`: authenticated users may insert/update/select only their own row (`id = auth.uid()`); no anon access. `id` is always the Supabase Auth user's own id, never the column's `gen_random_uuid()` default (migration `0010`, feature `004-auth-lead-creation`).
+- Authenticated (`authenticated` role) clients may also INSERT their own `match_sessions`/`match_results` rows (`user_id = auth.uid()` for sessions), mirroring the anon policies above — needed once login persists across reloads, so a returning logged-in user's Sport Match™ session still writes correctly (migration `0011`, feature `004-auth-lead-creation`).
 
 ## Migration order
 

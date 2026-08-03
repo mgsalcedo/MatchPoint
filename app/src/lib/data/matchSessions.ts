@@ -14,12 +14,14 @@ import type { MatchResult, SportMatchAnswers } from "../../types";
 
 export interface PersistMatchOutcome {
   matchSessionId: string;
+  matchResultIds: Record<string, string>; // organizationId -> match_results.id; empty if not persisted
   persisted: boolean; // false = write failed; results are still valid, per FR-009
 }
 
 export async function createMatchSession(
   answers: SportMatchAnswers,
-  results: MatchResult[]
+  results: MatchResult[],
+  userId?: string | null
 ): Promise<PersistMatchOutcome> {
   const matchSessionId = crypto.randomUUID();
   try {
@@ -31,22 +33,24 @@ export async function createMatchSession(
       getDistrictId(answers.district),
     ]);
 
-    const sessionRow = buildMatchSessionRow(matchSessionId, answers, sportId, districtId);
+    const sessionRow = buildMatchSessionRow(matchSessionId, answers, sportId, districtId, userId);
     const { error: sessionError } = await supabase.from("match_sessions").insert(sessionRow);
     if (sessionError) throw sessionError;
 
+    let matchResultIds: Record<string, string> = {};
     if (results.length > 0) {
       const resultRows = buildMatchResultRows(matchSessionId, results);
       const { error: resultsError } = await supabase.from("match_results").insert(resultRows);
       if (resultsError) throw resultsError;
+      matchResultIds = Object.fromEntries(resultRows.map((r) => [r.organization_id, r.id]));
     }
 
-    return { matchSessionId, persisted: true };
+    return { matchSessionId, matchResultIds, persisted: true };
   } catch (err) {
     // FR-009: a save failure must never block or blank the results screen. Logged payload
     // (err only) carries no contact/location-precision data beyond what's already shown in
     // the UI, per docs/security-standards.md's allow-list posture for logs/analytics.
-    console.error("[MatchPoint] Failed to persist match session", err);
-    return { matchSessionId, persisted: false };
+    console.error("[MatchPoint] Failed to persist match session", err instanceof Error ? err.message : err);
+    return { matchSessionId, matchResultIds: {}, persisted: false };
   }
 }

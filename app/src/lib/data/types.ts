@@ -59,6 +59,16 @@ export type DbMatchLabel =
   | "possible_match"
   | "weak_match";
 
+// 004-auth-lead-creation: vocabularies for writing leads.
+export type DbContactType = "whatsapp" | "instagram" | "booking" | "call" | "form";
+
+export type DbLeadSource =
+  | "result_card"
+  | "organization_profile"
+  | "event_profile"
+  | "direct_search"
+  | "admin_test";
+
 export interface DbSportRow {
   id: string;
   name: string;
