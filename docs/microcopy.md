@@ -45,6 +45,8 @@ Alternatives: "Cruzando tu objetivo, horario y ubicación...", "Ya casi tengo tu
 
 Headline: "Tu Match está listo." Subheadline: "Estas son las comunidades que más se parecen a lo que buscas." Alternative: "Encontré comunidades que podrían ser un gran match para ti."
 
+Persistent secondary action (`006-no-empty-results`, always visible regardless of match quality): "Cambiar mis respuestas."
+
 ## Match labels
 
 Excelente Match, Muy buen Match, Buen Match, Match posible, Baja compatibilidad. (Enum mapping in `docs/component-library.md`'s `MatchLabel`.)
@@ -53,7 +55,7 @@ Excelente Match, Muy buen Match, Buen Match, Match posible, Baja compatibilidad.
 
 Lead-in: "Te recomendamos esta comunidad porque:"
 
-Reasons pool: "Entrena cerca de ti.", "Coincide con tus horarios.", "Acepta principiantes.", "Tiene un ambiente social.", "Está alineada con tu objetivo.", "Tiene sesiones para tu nivel.", "Ofrece clase de prueba.", "Tiene un enfoque de alto rendimiento.", "Es ideal para empezar.", "Tiene entrenamientos grupales."
+Reasons pool: "Entrena cerca de ti.", "Coincide con tus horarios.", "Acepta principiantes.", "Tiene un ambiente social.", "Está alineada con tu objetivo.", "Tiene sesiones para tu nivel.", "Ofrece clase de prueba.", "Tiene un enfoque de alto rendimiento.", "Es ideal para empezar.", "Tiene entrenamientos grupales.", "Ofrece {deporte}." (fallback-only, `006-no-empty-results` — used when no other dimension produced a reason, so a sport-matching community is never shown with zero explanation).
 
 Avoid: "Algorithm score.", "This provider matches your query.", "Ranked result."
 
@@ -75,7 +77,7 @@ By channel: "Contactar por WhatsApp" · "Contactar por Instagram" · "Reservar c
 
 ## Empty states
 
-- **No match** — "No encontré un match perfecto todavía, pero estas son las opciones más cercanas." Actions: Ampliar distrito, Cambiar horario, Probar otro deporte.
+- **No communities for this sport** (`006-no-empty-results` — the only remaining true empty state; "weak-but-real matches" is no longer one, see `docs/matching-engine.md`'s No-match case) — "Todavía no tenemos comunidades de este deporte." / "No es algo que puedas resolver cambiando tus otras respuestas — elige otro deporte y sigo buscando." Action: "Elegir otro deporte" (returns to the sport question specifically, keeping other answers).
 - **No contact** — "Esta comunidad todavía no tiene un canal de contacto confirmado."
 - **No schedule** — "Horario por confirmar."
 - **No price** — "Precio no confirmado."

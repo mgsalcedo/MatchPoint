@@ -108,6 +108,8 @@ type MatchResultCardProps = {
 
 Required content: name, match label, sport, district, reasons, CTA. Rules: show 2-3 reasons on card; do not show raw score as primary UI; CTA label "Ver comunidad".
 
+Below the result list, a plain secondary button — "Cambiar mis respuestas" — is always visible regardless of match quality (`006-no-empty-results` FR-008). Not a new reusable component (a single-use link-button on the Results screen), just noted here so it's not undocumented.
+
 ## MatchReasonList
 
 Shows why a recommendation fits.
@@ -258,17 +260,17 @@ Copy: title "Continúa para contactar.", body "Así podremos guardar tu Match y 
 
 ## EmptyMatchState
 
-Recovers from no strong results.
+Narrowed (`006-no-empty-results`): recovers from the one remaining true empty state — zero organizations in the catalog offer the requested sport. "Weak-but-real matches" is no longer a state this component needs to handle; those are always shown as normal results now (with a persistent "change answers" action on the results screen itself, not this component — see `MatchResultCard`/Results flow). `onExpandDistrict`/`onChangeSchedule` are dropped: neither helps when the gap is sport coverage, not answer shape.
 
 ```ts
 type EmptyMatchStateProps = {
-  onExpandDistrict: () => void
-  onChangeSchedule: () => void
-  onRestart: () => void
+  onChooseAnotherSport: () => void
 }
 ```
 
-Copy: "No encontré un match perfecto todavía, pero estas son las opciones más cercanas."
+Copy: "Todavía no tenemos comunidades de este deporte." / "No es algo que puedas resolver cambiando tus otras respuestas — elige otro deporte y sigo buscando." Action label: "Elegir otro deporte."
+
+Note: `Results.tsx`'s actual implementation inlines this state directly rather than using a shared component — that drift predates `006-no-empty-results` and isn't this fix's job to resolve; the copy/props above describe the intended shape either way.
 
 ## ErrorMessage
 

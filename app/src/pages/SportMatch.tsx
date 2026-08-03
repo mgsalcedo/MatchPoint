@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { MatchGuide } from "../components/MatchGuide";
 import { ProgressBar } from "../components/ProgressBar";
 import { DISTRICTS } from "../data/organizations";
@@ -95,10 +95,20 @@ const GUIDE_MICROCOPY = [
   "Última pregunta, lo prometo.",
 ];
 
+// 006-no-empty-results FR-009: derived, not hardcoded, so a future reorder of QUESTIONS doesn't
+// silently point "choose a different sport" at the wrong question.
+const SPORT_QUESTION_INDEX = QUESTIONS.findIndex((q) => q.key === "sport");
+
 export function SportMatch() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { answers, updateAnswers, finalizeMatch } = useMatchSession();
-  const [step, setStep] = useState(0);
+  // Results.tsx's true-empty-catalog action navigates here with { startAt: "sport" } — a single
+  // literal, not a general "jump to any question" feature (research.md R5). answers stay in
+  // MatchSessionContext (not reset), so "‹ Atrás" from the sport question still shows whatever
+  // was previously answered for goal, not a blank state.
+  const startAt = (location.state as { startAt?: "sport" } | null)?.startAt;
+  const [step, setStep] = useState(() => (startAt === "sport" ? SPORT_QUESTION_INDEX : 0));
   const [draftDays, setDraftDays] = useState<Weekday[]>([]);
   const [matching, setMatching] = useState(false);
 
