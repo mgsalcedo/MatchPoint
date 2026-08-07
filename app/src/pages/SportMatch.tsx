@@ -5,6 +5,7 @@ import { ProgressBar } from "../components/ProgressBar";
 import { DISTRICTS } from "../data/organizations";
 import { useMatchSession } from "../context/MatchSessionContext";
 import { track } from "../lib/analytics";
+import { extractMatchAnswers, decideNextStep } from "../lib/data/matchExtraction";
 import {
   BUDGET_LABELS,
   DAY_LABELS,
@@ -109,22 +110,36 @@ const GUIDE_MICROCOPY = [
   "Última pregunta, lo prometo — y es una importante.",
 ];
 
-// 006-no-empty-results FR-009: derived, not hardcoded, so a future reorder of QUESTIONS doesn't
-// silently point "choose a different sport" at the wrong question.
-const SPORT_QUESTION_INDEX = QUESTIONS.findIndex((q) => q.key === "sport");
+// 006-no-empty-results FR-009, generalized in 010-ai-freetext-sport-match FR-005: derived, not
+// hardcoded, so a future reorder of QUESTIONS doesn't silently point at the wrong question —
+// now used both by Results.tsx's "choose a different sport" action and by free-text extraction
+// routing to whichever field wasn't stated.
+function questionIndexFor(key: keyof SportMatchAnswers): number {
+  const index = QUESTIONS.findIndex((q) => q.key === key);
+  return index === -1 ? 0 : index;
+}
 
 export function SportMatch() {
   const navigate = useNavigate();
   const location = useLocation();
   const { answers, updateAnswers, finalizeMatch } = useMatchSession();
-  // Results.tsx's true-empty-catalog action navigates here with { startAt: "sport" } — a single
-  // literal, not a general "jump to any question" feature (research.md R5). answers stay in
-  // MatchSessionContext (not reset), so "‹ Atrás" from the sport question still shows whatever
-  // was previously answered for goal, not a blank state.
-  const startAt = (location.state as { startAt?: "sport" } | null)?.startAt;
-  const [step, setStep] = useState(() => (startAt === "sport" ? SPORT_QUESTION_INDEX : 0));
+  // Results.tsx's true-empty-catalog action navigates here with { startAt: "sport" }; free-text
+  // extraction (010) reuses the same mechanism generalized to any question key (research.md,
+  // 006-no-empty-results research.md R5's single-literal note no longer applies). answers stay
+  // in MatchSessionContext (not reset), so "‹ Atrás" from a mid-flow question still shows
+  // whatever was previously answered, not a blank state.
+  const startAt = (location.state as { startAt?: keyof SportMatchAnswers } | null)?.startAt;
+  const [step, setStep] = useState(() => (startAt ? questionIndexFor(startAt) : 0));
   const [draftDays, setDraftDays] = useState<Weekday[]>([]);
   const [matching, setMatching] = useState(false);
+
+  // 010-ai-freetext-sport-match: the opt-in "describe it in your own words" entry point, only
+  // offered at the very first question (FR-002) — never on Welcome (docs/ux-flows.md Screen 1's
+  // single-CTA rule), never mid-questionnaire (the tap-through stays the default path, Principle II).
+  const [freeTextMode, setFreeTextMode] = useState(false);
+  const [freeText, setFreeText] = useState("");
+  const [extracting, setExtracting] = useState(false);
+  const [extractionFailed, setExtractionFailed] = useState(false);
 
   // Mount, not the Welcome screen's button click — a visitor can land on /match directly
   // (browser back/forward, refresh) without going through that click handler; the mount is the
@@ -156,10 +171,50 @@ export function SportMatch() {
         });
         return;
       }
+      setExtractionFailed(false); // clears the fallback explanation once the user moves past it
       setStep((s) => s + 1);
     },
     [question.key, isLast, answers, updateAnswers, finalizeMatch, navigate]
   );
+
+  // 010-ai-freetext-sport-match: extraction never guesses (FR-005) — decideNextStep only ever
+  // finalizes on a complete extraction, routes to the first genuinely-missing question, or falls
+  // back to the plain questionnaire on any failure. Same finalize-path shape as goToNext's last
+  // question, since both end at the same "matching" loading screen.
+  const submitFreeText = async () => {
+    const trimmed = freeText.trim();
+    if (!trimmed) return;
+
+    setExtracting(true);
+    setExtractionFailed(false);
+    const result = await extractMatchAnswers(trimmed);
+    const decision = decideNextStep(result);
+    updateAnswers(result.extracted);
+    setExtracting(false);
+
+    if (decision.action === "finalize") {
+      const finalAnswers = { ...answers, ...result.extracted } as SportMatchAnswers;
+      setFreeTextMode(false);
+      setMatching(true);
+      const minDelay = new Promise((resolve) => window.setTimeout(resolve, 1500));
+      void Promise.all([finalizeMatch(finalAnswers), minDelay]).finally(() => {
+        navigate("/match/results");
+      });
+      return;
+    }
+
+    if (decision.action === "askMissing") {
+      setFreeTextMode(false);
+      setStep(questionIndexFor(decision.startAt));
+      return;
+    }
+
+    // fallback: extraction failed entirely — brief explanation, then the plain tap-through
+    // questionnaire from the first question (FR-008), never a raw error or a stuck screen.
+    setExtractionFailed(true);
+    setFreeTextMode(false);
+    setStep(0);
+  };
 
   if (matching) {
     return (
@@ -182,7 +237,14 @@ export function SportMatch() {
   return (
     <div className="screen">
       {step > 0 && (
-        <button className="link-button" style={{ marginBottom: 12 }} onClick={() => setStep((s) => s - 1)}>
+        <button
+          className="link-button"
+          style={{ marginBottom: 12 }}
+          onClick={() => {
+            setExtractionFailed(false);
+            setStep((s) => s - 1);
+          }}
+        >
           ‹ Atrás
         </button>
       )}
@@ -193,46 +255,92 @@ export function SportMatch() {
 
       <div key={step} className="question-block rise-in">
         <MatchGuide text={GUIDE_MICROCOPY[step]} />
-        <h2>{question.title}</h2>
-        {question.helper && <p>{question.helper}</p>}
 
-        {question.type === "single" && (
-          <div className="option-list">
-            {question.options.map((opt) => (
-              <button key={opt.value} className="option" onClick={() => goToNext(opt.value)}>
-                {opt.label}
-              </button>
-            ))}
-          </div>
+        {extractionFailed && (
+          <p>No logré entender bien tu mensaje — vamos paso a paso, como siempre.</p>
         )}
 
-        {question.type === "multi" && (
+        {step === 0 && !freeTextMode && (
+          <button className="link-button" style={{ marginBottom: 8 }} onClick={() => setFreeTextMode(true)}>
+            Prefiero describirlo con mis palabras
+          </button>
+        )}
+
+        {freeTextMode ? (
           <>
-            <div className="option-list">
-              {question.options.map((opt) => {
-                const selected = draftDays.includes(opt.value as Weekday);
-                return (
-                  <button
-                    key={opt.value}
-                    className={`option${selected ? " selected" : ""}`}
-                    onClick={() =>
-                      setDraftDays((days) =>
-                        selected ? days.filter((d) => d !== opt.value) : [...days, opt.value as Weekday]
-                      )
-                    }
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </div>
+            <h2>Cuéntame qué buscas, con tus palabras</h2>
+            <p>
+              Menciona lo que puedas: deporte, distrito, días, horario, nivel, presupuesto,
+              ambiente. Lo que falte, te lo pregunto después.
+            </p>
+            <textarea
+              className="free-text-input"
+              value={freeText}
+              onChange={(e) => setFreeText(e.target.value)}
+              placeholder="Ej: Trabajo hasta las 7, vivo en Magdalena, quiero preparar mi primera media maratón y conocer gente."
+              rows={4}
+              maxLength={500}
+              disabled={extracting}
+            />
             <button
               className="btn btn-primary btn-block"
-              disabled={draftDays.length === 0}
-              onClick={() => goToNext(draftDays)}
+              disabled={!freeText.trim() || extracting}
+              onClick={() => void submitFreeText()}
             >
-              Continuar
+              {extracting ? "Buscando..." : "Continuar"}
             </button>
+            <button
+              className="link-button"
+              onClick={() => setFreeTextMode(false)}
+              disabled={extracting}
+            >
+              Prefiero elegir de las opciones
+            </button>
+          </>
+        ) : (
+          <>
+            <h2>{question.title}</h2>
+            {question.helper && <p>{question.helper}</p>}
+
+            {question.type === "single" && (
+              <div className="option-list">
+                {question.options.map((opt) => (
+                  <button key={opt.value} className="option" onClick={() => goToNext(opt.value)}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {question.type === "multi" && (
+              <>
+                <div className="option-list">
+                  {question.options.map((opt) => {
+                    const selected = draftDays.includes(opt.value as Weekday);
+                    return (
+                      <button
+                        key={opt.value}
+                        className={`option${selected ? " selected" : ""}`}
+                        onClick={() =>
+                          setDraftDays((days) =>
+                            selected ? days.filter((d) => d !== opt.value) : [...days, opt.value as Weekday]
+                          )
+                        }
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  className="btn btn-primary btn-block"
+                  disabled={draftDays.length === 0}
+                  onClick={() => goToNext(draftDays)}
+                >
+                  Continuar
+                </button>
+              </>
+            )}
           </>
         )}
       </div>

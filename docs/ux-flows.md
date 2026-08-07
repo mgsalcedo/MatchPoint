@@ -46,6 +46,16 @@ flowchart TD
     I --> J[Calculate Match]
 ```
 
+### Free-text entry (010-ai-freetext-sport-match)
+
+A quiet secondary link ("Prefiero describirlo con mis palabras") sits above the Goal question only — never on Welcome (Screen 1's single-CTA rule stays untouched) and never re-offered mid-questionnaire. Choosing it swaps the question card for a single textarea; submitting sends the sentence to a server-side extraction step and always resolves one of three ways, never a fourth silent option:
+
+- **All 8 fields stated** → skips straight to the matching/results transition, same as answering the last question normally.
+- **Some fields stated** → those are pre-filled and the user lands on the first genuinely-unstated question, continuing the normal tap-through from there (already-answered questions are never re-asked).
+- **Nothing usable extracted, or the extraction call fails** → a brief Match™-voiced note ("No logré entender bien tu mensaje — vamos paso a paso, como siempre.") and the user starts the plain tap-through from Goal — never a raw error, never a stuck screen.
+
+The tap-through path itself is completely unchanged — free text is an alternate on-ramp into the same flow, not a second flow.
+
 ### Screens (question, options, validation)
 
 - **Goal** — "¿Qué quieres lograr?" → Empezar un deporte / Preparar una carrera / Mejorar rendimiento / Mantenerme activo / Bajar de peso / Conocer gente / Otro. One option required; if "Otro", allow optional short text or defer to later version.

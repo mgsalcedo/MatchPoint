@@ -38,6 +38,14 @@ Alternative ("Option B", not used for PMV): "Encuentra dónde entrenar, con qui�
 
 Helper text implementation note (`008-jovial-tone`, research.md R1): documented since this doc's creation but never rendered in the app until this feature — plain paragraph under each question title, reusing existing typography, no new component.
 
+## Free-text Sport Match™ entry (`010-ai-freetext-sport-match`)
+
+Toggle link, shown only above the Goal question: "Prefiero describirlo con mis palabras."
+
+Free-text screen: Title "Cuéntame qué buscas, con tus palabras." Body: "Menciona lo que puedas: deporte, distrito, días, horario, nivel, presupuesto, ambiente. Lo que falte, te lo pregunto después." Placeholder: "Ej: Trabajo hasta las 7, vivo en Magdalena, quiero preparar mi primera media maratón y conocer gente." CTA: "Continuar" (shows "Buscando..." while the extraction call is in flight). Secondary link back to the tap-through: "Prefiero elegir de las opciones."
+
+Extraction-failed fallback (nothing usable extracted, or the call fails — never shown for a merely-partial extraction, which routes silently to the next question instead): "No logré entender bien tu mensaje — vamos paso a paso, como siempre." Stays literal/reassuring per the same never-blame register as other error states (`docs/match-character.md`) — this is Match™ not understanding, never the user having done something wrong.
+
 ## Sport Match™ guide lines (Match™'s own voice above each question, `GUIDE_MICROCOPY`)
 
 1. Goal — "Arranquemos por lo importante: ¿qué quieres lograr?"

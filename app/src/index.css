@@ -379,6 +379,31 @@ a:focus-visible {
   align-self: center;
 }
 
+/* 010-ai-freetext-sport-match: free-text entry into Sport Match™ — same bordered-surface
+   language as .btn/.option, not a new visual language. */
+.free-text-input {
+  width: 100%;
+  min-height: 96px;
+  padding: var(--space-3) var(--space-4);
+  margin: var(--space-2) 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 15px;
+  resize: vertical;
+}
+
+.free-text-input:disabled {
+  opacity: 0.6;
+}
+
+.free-text-input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 /* --- Pointer-device hover. Scoped so a tapped element never sticks. ------- */
 @media (hover: hover) {
   .btn-primary:hover:not(:disabled) {
