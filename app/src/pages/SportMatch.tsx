@@ -5,7 +5,7 @@ import { ProgressBar } from "../components/ProgressBar";
 import { DISTRICTS } from "../data/organizations";
 import { useMatchSession } from "../context/MatchSessionContext";
 import { track } from "../lib/analytics";
-import { extractMatchAnswers, decideNextStep } from "../lib/data/matchExtraction";
+import { extractMatchAnswers, decideNextStep, nextUnansweredIndex } from "../lib/data/matchExtraction";
 import {
   BUDGET_LABELS,
   DAY_LABELS,
@@ -150,31 +150,30 @@ export function SportMatch() {
 
   const question = QUESTIONS[step];
 
-  const isLast = step === QUESTIONS.length - 1;
-
   const goToNext = useMemo(
     () => (value: unknown) => {
       const partial = { [question.key]: value } as Partial<SportMatchAnswers>;
+      const merged = { ...answers, ...partial };
       updateAnswers(partial);
-      if (isLast) {
+
+      // Skip forward past anything already answered (e.g. by free-text extraction) rather than
+      // just advancing one step — otherwise a partially-extracted sentence would still get
+      // re-asked for every field after the first missing one (FR-005).
+      const next = nextUnansweredIndex(step + 1, merged);
+      if (next >= QUESTIONS.length) {
         setMatching(true);
-        // Build the fully-merged answers directly, rather than relying on `answers` from
-        // context state: React hasn't applied the updateAnswers() setState above yet at this
-        // point in the same synchronous handler, so `answers` here is still one question
-        // behind. Passing the merge explicitly to finalizeMatch avoids that stale read.
-        const finalAnswers = { ...answers, ...partial } as SportMatchAnswers;
         // Real matching/persistence now runs async (Supabase-backed); keep the branded
         // loading screen's minimum duration so a fast response doesn't flash past it.
         const minDelay = new Promise((resolve) => window.setTimeout(resolve, 1500));
-        void Promise.all([finalizeMatch(finalAnswers), minDelay]).finally(() => {
+        void Promise.all([finalizeMatch(merged as SportMatchAnswers), minDelay]).finally(() => {
           navigate("/match/results");
         });
         return;
       }
       setExtractionFailed(false); // clears the fallback explanation once the user moves past it
-      setStep((s) => s + 1);
+      setStep(next);
     },
-    [question.key, isLast, answers, updateAnswers, finalizeMatch, navigate]
+    [question.key, step, answers, updateAnswers, finalizeMatch, navigate]
   );
 
   // 010-ai-freetext-sport-match: extraction never guesses (FR-005) — decideNextStep only ever
