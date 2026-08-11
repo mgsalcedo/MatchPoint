@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { decideNextStep, type ExtractionResult } from "./matchExtraction";
+import { decideNextStep, nextUnansweredIndex, ANSWER_ORDER, type ExtractionResult } from "./matchExtraction";
 
 // decideNextStep is the piece Constitution Principle III requires TDD for — it gates whether
 // possibly-incomplete extraction can reach finalizeMatch() (FR-005, never guesses). extractMatchAnswers
@@ -91,5 +91,48 @@ describe("decideNextStep", () => {
       missing: ["goal", "sport", "district", "days", "time", "level", "budget", "environment"],
     });
     expect(decideNextStep(result)).toEqual({ action: "askMissing", startAt: "goal" });
+  });
+});
+
+describe("nextUnansweredIndex", () => {
+  // Regression test: a real user sentence ("running, la molina, dos veces a la semana, noches,
+  // principiante") extracted sport/district/time/level but not goal/days/budget/environment.
+  // decideNextStep correctly routed to "goal" (the first missing field), but SportMatch.tsx's
+  // question-by-question advancement re-asked sport/district/time/level anyway, because it only
+  // ever moved one step forward instead of skipping every already-answered field along the way —
+  // the bug this function (and its use in SportMatch.tsx's goToNext) fixes.
+  it("skips every already-answered field, not just the first one", () => {
+    const answers = {
+      sport: "running" as const,
+      district: "La Molina",
+      time: "noche" as const,
+      level: "principiante" as const,
+    };
+    // Starting from "goal" (index 0, itself unanswered): must land on "goal" immediately...
+    expect(ANSWER_ORDER[nextUnansweredIndex(0, answers)]).toBe("goal");
+    // ...and advancing past "goal" must skip sport/district/time/level (all answered) and land
+    // on "days" — not on "sport", which a naive step+1 would incorrectly re-ask.
+    const goalIndex = ANSWER_ORDER.indexOf("goal");
+    expect(ANSWER_ORDER[nextUnansweredIndex(goalIndex + 1, answers)]).toBe("days");
+  });
+
+  it("returns ANSWER_ORDER.length when every remaining field is already answered", () => {
+    const answers = {
+      goal: "empezar" as const,
+      sport: "running" as const,
+      district: "San Isidro",
+      days: ["lun" as const],
+      time: "noche" as const,
+      level: "principiante" as const,
+      budget: "gratis" as const,
+      environment: "social" as const,
+    };
+    expect(nextUnansweredIndex(0, answers)).toBe(ANSWER_ORDER.length);
+  });
+
+  it("does not skip a field that is genuinely unanswered even mid-sequence", () => {
+    const answers = { goal: "empezar" as const, sport: "running" as const };
+    // district (index 2) is unanswered — must stop there, not skip past it.
+    expect(ANSWER_ORDER[nextUnansweredIndex(0, answers)]).toBe("district");
   });
 });

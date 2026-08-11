@@ -14,10 +14,10 @@ export interface ExtractionResult {
   ok: boolean;
 }
 
-// Same order QUESTIONS is defined in SportMatch.tsx — kept as a separate constant here (not
+// Must match QUESTIONS' order in SportMatch.tsx — kept as a separate constant here (not
 // imported from the page component) so this module has no UI dependency, per
 // docs/base-standards.md's isolate-business-logic-from-IO/framework rule.
-const ANSWER_ORDER: (keyof SportMatchAnswers)[] = [
+export const ANSWER_ORDER: (keyof SportMatchAnswers)[] = [
   "goal",
   "sport",
   "district",
@@ -60,4 +60,23 @@ export function decideNextStep(result: ExtractionResult): RoutingDecision {
 
   const firstMissing = ANSWER_ORDER.find((key) => result.missing.includes(key));
   return { action: "askMissing", startAt: firstMissing ?? ANSWER_ORDER[0] };
+}
+
+/**
+ * Scans forward from `fromIndex` (in ANSWER_ORDER/QUESTIONS order) and returns the index of the
+ * first field NOT already present in `answers` — skipping every already-answered field along the
+ * way, not just landing on the first one. Returns `ANSWER_ORDER.length` when everything from
+ * `fromIndex` onward is already answered (caller should finalize instead of asking more).
+ *
+ * This is the piece that makes FR-005 ("already-extracted fields MUST be pre-filled, not
+ * re-asked") actually hold as the user taps through subsequent questions — landing on the first
+ * missing field alone isn't enough if later fields were also extracted; without this, a partial
+ * extraction would only skip the very first gap and then re-ask everything after it.
+ */
+export function nextUnansweredIndex(fromIndex: number, answers: Partial<SportMatchAnswers>): number {
+  let i = fromIndex;
+  while (i < ANSWER_ORDER.length && answers[ANSWER_ORDER[i]] !== undefined) {
+    i++;
+  }
+  return i;
 }

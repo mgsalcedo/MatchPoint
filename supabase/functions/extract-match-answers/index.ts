@@ -153,8 +153,16 @@ function buildResult(raw: ExtractedAnswers) {
       missing.push(key);
       continue;
     }
-    if (key === "district" && !KNOWN_DISTRICTS.includes(value as string)) {
-      missing.push(key); // unvalidated/unknown district — never guessed or auto-corrected
+    if (key === "district") {
+      // Case-insensitive match against the whitelist, normalized to the canonical casing the
+      // client expects — the model isn't reliably consistent about capitalization even when
+      // instructed to be, and a mismatched case must not silently become "missing."
+      const canonical = KNOWN_DISTRICTS.find((d) => d.toLowerCase() === (value as string).toLowerCase());
+      if (!canonical) {
+        missing.push(key); // unvalidated/unknown district — never guessed or auto-corrected
+        continue;
+      }
+      extracted[key] = canonical;
       continue;
     }
     if (key === "days" && Array.isArray(value) && value.length === 0) {
